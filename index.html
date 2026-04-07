@@ -25,6 +25,46 @@
             margin: 0;
         }
 
+        /* --- ÉCRAN DE CHARGEMENT --- */
+        #loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-dark);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+        #loader.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 6px solid rgba(255, 255, 255, 0.1);
+            border-top-color: #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin { 
+            100% { transform: rotate(360deg); } 
+        }
+
+        #loader h3 { margin: 0; letter-spacing: 2px; }
+        #loader p { color: #95a5a6; font-size: 0.9em; margin-top: 5px; }
+        /* --------------------------- */
+
         .main-container {
             display: flex;
             gap: 30px;
@@ -56,7 +96,7 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
 
-        .tabs button:nth-child(5) { grid-column: span 2; }
+        .tabs button:nth-child(5), .tabs button:nth-child(6) { grid-column: span 2; }
 
         .tabs button {
             background: #e2e8f0;
@@ -122,19 +162,17 @@
             flex-direction: column;
         }
 
-        /* Empêcher la sélection/déplacement des titres */
         .header, h1, p strong { user-select: none; pointer-events: none; }
         
         .header { border-bottom: 2px solid #000; margin-bottom: 20px; display: flex; justify-content: space-between; font-weight: bold; pointer-events: auto;}
         .header div { pointer-events: none; }
-        .header div * { pointer-events: auto; } /* Réactiver les clics sur l'ID modifiable */
+        .header div * { pointer-events: auto; } 
 
         h1 { font-size: 1.8em; margin: 10px 0; text-align: center; }
 
         .editable-zone { border-bottom: 1px dashed #999; min-width: 30px; height: auto; display: inline-block; outline: none; transition: background 0.2s; word-break: break-word; }
         .editable-zone:focus { background: #ffffd0; border-bottom: 1px solid #000; }
         
-        /* Classe pour enlever les pointillés sous les personnes */
         .no-underline { border-bottom: none !important; }
 
         .paper-list { margin: 0; padding-left: 20px; list-style-type: square; }
@@ -147,7 +185,7 @@
 
         .evidence-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
         .evidence-item { border: 1px solid #333; padding: 5px; background: #fff; text-align: center; position: relative; }
-        .evidence-item img { width: 100%; height: 180px; object-fit: cover; display: block; margin-bottom: 5px; }
+        .evidence-item img { width: 100%; max-height: 200px; object-fit: contain; display: block; margin-bottom: 5px; }
 
         .remove-btn { color: #e74c3c; cursor: pointer; margin-left: 10px; font-weight: bold; font-family: sans-serif;}
         .exporting .remove-btn { display: none !important; }
@@ -182,9 +220,19 @@
             text-transform: uppercase;
             letter-spacing: 1px;
         }
+
+        /* Focus pour le collage d'image */
+        .paste-zone { cursor: pointer; transition: 0.2s; }
+        .paste-zone:focus { border-color: var(--blue-police) !important; background: #eef7ff !important; outline: none; }
     </style>
 </head>
 <body>
+
+    <div id="loader">
+        <div class="spinner"></div>
+        <h3>LSPD SYSTEM</h3>
+        <p>Connexion aux bases de données...</p>
+    </div>
 
     <div class="main-container">
         <div class="sidebar">
@@ -193,6 +241,7 @@
                 <button id="tab_INTERVENTION" onclick="switchReportType('INTERVENTION')">Intervention</button>
                 <button id="tab_ARRESTATION" onclick="switchReportType('ARRESTATION')">Arrestation</button>
                 <button id="tab_PLAINTE" onclick="switchReportType('PLAINTE')">Plainte</button>
+                <button id="tab_INVESTIGATION" onclick="switchReportType('INVESTIGATION')">Investigation</button>
                 <button id="tab_SAISIE" onclick="switchReportType('SAISIE')" style="background: #2c3e50; color: white;">Fiche Saisie (Civil)</button>
             </div>
 
@@ -200,6 +249,16 @@
                 <h3 id="ui_panel_title">Contrôles</h3>
                 
                 <div id="ctrl_standard">
+                    
+                    <section id="sec_investigation" class="d-none">
+                        <label>Motif de l'Investigation :</label>
+                        <select id="sel_inves_motif" onchange="updateInvesMotif()">
+                            <option value="Lieu">Lieu</option>
+                            <option value="Groupe Criminel">Groupe Criminel</option>
+                            <option value="Autre">Autre (Saisie manuelle sur fiche)</option>
+                        </select>
+                    </section>
+
                     <section id="sec_agents">
                         <label>Agents :</label>
                         <input type="text" id="sel_agent" list="list_agents" placeholder="Chercher un agent...">
@@ -208,7 +267,7 @@
                     </section>
 
                     <section id="sec_civils">
-                        <label>Personnes Impliquées :</label>
+                        <label id="lbl_ui_civils">Personnes Impliquées :</label>
                         <input type="text" id="sel_civil" list="list_civils" placeholder="Chercher un civil...">
                         <datalist id="list_civils"></datalist>
                         <div class="flex-row">
@@ -226,11 +285,11 @@
                     </section>
 
                     <section>
-                        <label>Preuves Photos :</label>
+                        <label>Preuves Photos (Fichier ou Ctrl+V) :</label>
                         <input type="file" id="file_input" multiple accept="image/*" onchange="handleImages(this)">
                     </section>
 
-                    <div class="manual-box">
+                    <div class="manual-box" id="manual_box_standard">
                         <label>➕ SAISIE MANUELLE</label>
                         <input type="text" id="manual_name" placeholder="Nom Prénom">
                         <div class="flex-row">
@@ -253,19 +312,24 @@
 
                 <div id="ctrl_saisie" class="d-none">
                     <section>
-                        <label>Photo de Profil (Mugshot) :</label>
+                        <label>Photo de Profil (Fichier ou Ctrl+V) :</label>
                         <input type="file" accept="image/*" onchange="loadPhotoSaisie(this, 'saisie_photo_profil')">
                     </section>
                     <section>
-                        <label>Photo Carte d'Identité :</label>
+                        <label>Photo Carte d'Identité (Fichier ou Ctrl+V) :</label>
                         <input type="file" accept="image/*" onchange="loadPhotoSaisie(this, 'saisie_photo_id')">
                     </section>
                     <div class="manual-box" style="text-align: center; font-size: 0.9em;">
-                        <strong>Note :</strong> Remplissez les champs (Nom, Âge, Casier...) directement en cliquant sur la feuille A4 à droite.
+                        <strong>Note :</strong> Remplissez les champs (Nom, Âge, Casier...) directement en cliquant sur la feuille A4 à droite.<br><br>
+                        <em>Astuce : Cliquez sur le cadre de la photo sur la feuille et faites Ctrl+V pour coller une image copiée.</em>
                     </div>
                 </div>
 
-                <button id="btn_export_jpg" onclick="exportTwoPages()" style="background:var(--warning); height:50px; margin-top:20px; font-size: 1.1em; border-radius: 8px;">EXPORTER</button>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button id="btn_export_jpg" onclick="exportTwoPages()" style="background:var(--warning); height:50px; flex: 3; font-size: 1.1em; border-radius: 8px;">EXPORTER</button>
+                    <button onclick="exportImportData()" style="background:#8e44ad; height:50px; flex: 1; font-size: 1.2em; border-radius: 8px;" title="Sauvegarder / Charger (Presse-papier)">💾 I/O</button>
+                </div>
+                
                 <button onclick="fullClear()" style="background:#c0392b; height:35px; margin-top:10px; font-size: 0.9em; border-radius: 8px; opacity: 0.9;">🗑️ TOUT EFFACER</button>
                 <button onclick="openBlankTab()" style="background:#3498db; height:35px; margin-top:10px; font-size: 0.9em; border-radius: 8px;">📄 NOUVEL ONGLET VIERGE</button>
             </div>
@@ -281,6 +345,11 @@
                 <h1 id="doc_main_title">RAPPORT</h1>
                 
                 <div id="a4_standard_body">
+                    
+                    <div id="a4_investigation_motif_box" class="d-none" style="margin-bottom: 15px;">
+                        <p><strong>MOTIF / CIBLE :</strong> <span id="a4_inves_target" class="editable-zone" contenteditable="true" style="min-width:200px;">Lieu</span></p>
+                    </div>
+
                     <div id="a4_agents">
                         <p><strong>OFFICIER(S) PRÉSENT(S) :</strong></p>
                         <ul id="paper_agents" class="paper-list"></ul>
@@ -311,7 +380,7 @@
                         <div>PEINE : <span id="total_peine" class="editable-zone" contenteditable="true">0</span> mois</div>
                     </div>
 
-                    <p><strong>RÉCIT DES FAITS :</strong></p>
+                    <p><strong>RÉCIT DES FAITS / DÉROULEMENT :</strong></p>
                     <div id="a4_recit" class="editable-zone" contenteditable="true" style="width:100%; min-height:150px; display:block;">Date : <br>Heure : <br>Lieu : <br><br>Déroulement :</div>
                     
                     <div id="a4_observations" class="d-none">
@@ -330,12 +399,12 @@
                             <div><strong>AFFILIATION CRIMINELLE :</strong> <span class="editable-zone no-underline" id="saisie_aff" contenteditable="true" style="min-width:150px;">Aucune / Inconnue</span></div>
                         </div>
                         <div style="width: 150px;">
-                            <div id="saisie_photo_profil" style="width: 150px; height: 150px; border: 2px dashed #999; display: flex; align-items: center; justify-content: center; text-align: center; color: #777; background: #fff; overflow: hidden; font-size: 0.8em;">PHOTO<br>PROFIL</div>
+                            <div id="saisie_photo_profil" class="paste-zone" tabindex="0" style="width: 150px; height: 150px; border: 2px dashed #999; display: flex; align-items: center; justify-content: center; text-align: center; color: #777; background: #fff; overflow: hidden; font-size: 0.8em; padding: 5px;">PHOTO<br>PROFIL<br><br><span style="font-size:0.8em">(Focus + Ctrl V)</span></div>
                         </div>
                     </div>
 
                     <p><strong>CARTE D'IDENTITÉ :</strong></p>
-                    <div id="saisie_photo_id" style="width: 100%; height: 220px; border: 2px dashed #999; display: flex; align-items: center; justify-content: center; text-align: center; color: #777; background: #fff; overflow: hidden; font-size: 0.9em; margin-bottom: 20px;">PHOTO CARTE D'IDENTITÉ</div>
+                    <div id="saisie_photo_id" class="paste-zone" tabindex="0" style="width: 100%; height: 220px; border: 2px dashed #999; display: flex; align-items: center; justify-content: center; text-align: center; color: #777; background: #fff; overflow: hidden; font-size: 0.9em; margin-bottom: 20px;">PHOTO CARTE D'IDENTITÉ <br> (Sélectionnez le cadre et faites Ctrl+V)</div>
 
                     <p><strong>CASIER JUDICIAIRE :</strong></p>
                     <div id="saisie_casier" class="editable-zone" contenteditable="true" style="width:100%; min-height:80px; display:block;">Vierge.</div>
@@ -362,27 +431,32 @@
             INCIDENT: {
                 title: "RAPPORT D'INCIDENT", labelDoc: "RAPPORT N°", labelSuspect: "CIVIL(S) IMPLIQUÉ(S) :", labelBtnSuspect: "+ Civil",
                 showAgents: true, showVictimes: false, showTemoins: false, showInfractions: false, showTotals: false, showObs: false,
-                clearDocId: false, isSaisie: false
+                clearDocId: false, isSaisie: false, isInvestigation: false
             },
             INTERVENTION: {
                 title: "RAPPORT D'INTERVENTION", labelDoc: "RAPPORT N°", labelSuspect: "CIVIL(S) IMPLIQUÉ(S) :", labelBtnSuspect: "+ Civil",
                 showAgents: true, showVictimes: false, showTemoins: false, showInfractions: false, showTotals: false, showObs: false,
-                clearDocId: false, isSaisie: false
+                clearDocId: false, isSaisie: false, isInvestigation: false
             },
             ARRESTATION: {
                 title: "RAPPORT D'ARRESTATION", labelDoc: "DOSSIER N°", labelSuspect: "SUSPECT(S) IMPLIQUÉ(S) :", labelBtnSuspect: "+ Suspect",
                 showAgents: true, showVictimes: true, showTemoins: true, showInfractions: true, showTotals: true, showObs: true,
-                clearDocId: false, labelInfractions: "CHEF(S) D'INCULPATION :", isSaisie: false
+                clearDocId: false, labelInfractions: "CHEF(S) D'INCULPATION :", isSaisie: false, isInvestigation: false
             },
             PLAINTE: {
                 title: "PLAINTE DÉPOSÉE", labelDoc: "DOSSIER N°", labelSuspect: "ACCUSÉ(ES) :", labelBtnSuspect: "+ Accusé(es)",
                 showAgents: false, showVictimes: true, showTemoins: true, showInfractions: true, showTotals: false, showObs: true,
-                clearDocId: true, labelInfractions: "MOTIF(S) :", isSaisie: false
+                clearDocId: true, labelInfractions: "MOTIF(S) :", isSaisie: false, isInvestigation: false
+            },
+            INVESTIGATION: {
+                title: "RAPPORT D'INVESTIGATION", labelDoc: "", labelSuspect: "SUJET(S) / PERSONNES LIÉES :", labelBtnSuspect: "+ Sujet",
+                showAgents: true, showVictimes: false, showTemoins: true, showInfractions: false, showTotals: false, showObs: true,
+                clearDocId: true, isSaisie: false, isInvestigation: true
             },
             SAISIE: {
                 title: "FICHE D'IDENTIFICATION CIVIL", labelDoc: "", labelSuspect: "", labelBtnSuspect: "",
                 showAgents: false, showVictimes: false, showTemoins: false, showInfractions: false, showTotals: false, showObs: false,
-                clearDocId: true, isSaisie: true
+                clearDocId: true, isSaisie: true, isInvestigation: false
             }
         };
 
@@ -406,14 +480,112 @@
                 });
             }
             
-            // Écouteur pour la mise à jour du nom de l'onglet
             document.getElementById('doc_id').addEventListener('input', updateTabTitle);
             
             switchReportType('INCIDENT'); 
+
+            // --- MASQUAGE DU LOADER ---
+            setTimeout(() => {
+                document.getElementById('loader').classList.add('hidden');
+            }, 600); // Délai de 0.6s pour fluidifier l'affichage
         };
 
-        // Fonction vide pour ne pas casser les appels html éventuels
-        function saveData() {}
+        // GESTION DU COLLAGE D'IMAGES (Ctrl+V)
+        document.addEventListener('paste', function(e) {
+            const items = e.clipboardData.items;
+            let imageFile = null;
+            for (let i = 0; i < items.length; i++) {
+                if (items[i].type.indexOf('image') !== -1) {
+                    imageFile = items[i].getAsFile();
+                    break;
+                }
+            }
+            
+            if (imageFile) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const active = document.activeElement;
+                    if (active && active.id === 'saisie_photo_profil') {
+                        active.innerHTML = `<img src="${event.target.result}" style="width:100%; height:100%; object-fit:contain; background:#fff;">`;
+                    } else if (active && active.id === 'saisie_photo_id') {
+                        active.innerHTML = `<img src="${event.target.result}" style="width:100%; height:100%; object-fit:contain; background:#fff;">`;
+                    } else {
+                        // Ajouter à la galerie de preuves
+                        const div = document.createElement('div');
+                        div.className = "evidence-item";
+                        div.innerHTML = `<img src="${event.target.result}"><span class="remove-btn" style="position:absolute; top:5px; right:5px; background:white; border-radius:50%; padding:0 5px;" onclick="this.parentElement.remove();">✘</span><div class="editable-zone no-underline" contenteditable="true" style="display:block; text-align:center; font-size:0.8em;">Description...</div>`;
+                        document.getElementById('evidence_gallery').appendChild(div);
+                    }
+                };
+                reader.readAsDataURL(imageFile);
+            }
+        });
+
+        // SAUVEGARDE ET CHARGEMENT VIA PRESSE-PAPIER
+        function exportImportData() {
+            let action = prompt("TAPEZ 'E' POUR EXPORTER OU 'I' POUR IMPORTER :\n(E = Copier les données actuelles / I = Coller des données)");
+            if(!action) return;
+            
+            action = action.toLowerCase().trim();
+            if(action === 'e' || action === 'exporter') {
+                const data = {
+                    type: currentType,
+                    html_agents: document.getElementById('paper_agents').innerHTML,
+                    html_victimes: document.getElementById('paper_victimes').innerHTML,
+                    html_suspects: document.getElementById('paper_suspects').innerHTML,
+                    html_temoins: document.getElementById('paper_temoins').innerHTML,
+                    html_infractions: document.getElementById('paper_infractions').innerHTML,
+                    html_evidence: document.getElementById('evidence_gallery').innerHTML,
+                    zones: {}
+                };
+                document.querySelectorAll('.editable-zone').forEach((el, index) => {
+                    data.zones[index] = el.innerHTML;
+                });
+                
+                if (CONFIG[currentType].isSaisie) {
+                    data.saisie_profil = document.getElementById('saisie_photo_profil').innerHTML;
+                    data.saisie_id = document.getElementById('saisie_photo_id').innerHTML;
+                }
+                
+                const b64 = btoa(encodeURIComponent(JSON.stringify(data)));
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(b64).then(() => alert("✅ Code de sauvegarde copié dans le presse-papier !\nVous pourrez le recharger plus tard."));
+                } else {
+                    prompt("Copiez manuellement ce code :", b64);
+                }
+
+            } else if(action === 'i' || action === 'importer') {
+                let code = prompt("Collez le code de sauvegarde ici :");
+                if(code) {
+                    try {
+                        const data = JSON.parse(decodeURIComponent(atob(code)));
+                        switchReportType(data.type);
+                        document.getElementById('paper_agents').innerHTML = data.html_agents;
+                        document.getElementById('paper_victimes').innerHTML = data.html_victimes;
+                        document.getElementById('paper_suspects').innerHTML = data.html_suspects;
+                        document.getElementById('paper_temoins').innerHTML = data.html_temoins;
+                        document.getElementById('paper_infractions').innerHTML = data.html_infractions;
+                        document.getElementById('evidence_gallery').innerHTML = data.html_evidence;
+                        
+                        document.querySelectorAll('.editable-zone').forEach((el, index) => {
+                            if(data.zones[index] !== undefined) el.innerHTML = data.zones[index];
+                        });
+                        
+                        if(data.saisie_profil) document.getElementById('saisie_photo_profil').innerHTML = data.saisie_profil;
+                        if(data.saisie_id) document.getElementById('saisie_photo_id').innerHTML = data.saisie_id;
+                        
+                        // Recalcul totals
+                        currentAmende = parseInt(document.getElementById('total_amende').innerText.replace(/\D/g,'')) || 0;
+                        currentPeine = parseInt(document.getElementById('total_peine').innerText) || 0;
+                        
+                        updateA4Visibility();
+                        alert("✅ Données importées avec succès !");
+                    } catch(e) {
+                        alert("❌ Erreur : Code invalide ou corrompu.");
+                    }
+                }
+            }
+        }
 
         function updateTabTitle() {
             const docId = document.getElementById('doc_id').innerText.trim() || "000";
@@ -442,6 +614,16 @@
             if (el) { show ? el.classList.remove('d-none') : el.classList.add('d-none'); }
         }
 
+        function updateInvesMotif() {
+            const val = document.getElementById('sel_inves_motif').value;
+            const target = document.getElementById('a4_inves_target');
+            if (val === 'Autre') {
+                target.innerText = 'Saisie manuelle...';
+            } else {
+                target.innerText = val;
+            }
+        }
+
         function switchReportType(type) {
             currentType = type;
             const conf = CONFIG[type];
@@ -449,8 +631,18 @@
             document.querySelectorAll('.tabs button').forEach(btn => btn.classList.remove('active'));
             document.getElementById(`tab_${type}`).classList.add('active');
 
+            // On vide tout d'abord
             clearAllData();
             
+            // --- AJOUT DE LA CORRECTION ICI ---
+            // On définit le texte des observations APRES avoir vidé les données
+            if (type === 'PLAINTE' || type === 'INVESTIGATION') {
+                document.getElementById('a4_obs_text').innerHTML = ""; 
+            } else {
+                document.getElementById('a4_obs_text').innerHTML = "Amende appliquée et réglée le ***.";
+            }
+            // ----------------------------------
+
             document.getElementById('ui_panel_title').innerText = `Dossier - ${type.charAt(0) + type.slice(1).toLowerCase()}`;
             document.getElementById('doc_main_title').innerText = conf.title;
             
@@ -486,6 +678,16 @@
                 document.getElementById('ctrl_saisie').classList.add('d-none');
                 document.getElementById('page2').classList.remove('d-none');
                 document.getElementById('a4_saisie_body').classList.remove('console-mechanic');
+            }
+
+            if (conf.isInvestigation) {
+                document.getElementById('sec_investigation').classList.remove('d-none');
+                document.getElementById('a4_investigation_motif_box').classList.remove('d-none');
+                document.getElementById('sel_inves_motif').value = 'Lieu';
+                updateInvesMotif();
+            } else {
+                document.getElementById('sec_investigation').classList.add('d-none');
+                document.getElementById('a4_investigation_motif_box').classList.add('d-none');
             }
 
             const isSaisie = conf.isSaisie;
@@ -531,7 +733,6 @@
         }
 
         function clearAllData() {
-            // Nettoyage des listes standards
             document.getElementById('paper_agents').innerHTML = '';
             document.getElementById('paper_victimes').innerHTML = '';
             document.getElementById('paper_suspects').innerHTML = '';
@@ -542,11 +743,12 @@
             document.getElementById('sel_agent').value = '';
             document.getElementById('sel_infraction').value = '';
             
-            // Restauration des autoremplissages
             document.getElementById('a4_recit').innerHTML = "Date : <br>Heure : <br>Lieu : <br><br>Déroulement :";
-            document.getElementById('a4_obs_text').innerHTML = "Amende appliquée et réglée le ***.";
-            document.getElementById('a4_signature').innerHTML = "";
             
+            // --- LIGNE SUPPRIMÉE ICI POUR ÉVITER LE BUG ---
+            // document.getElementById('a4_obs_text').innerHTML = "..."; 
+            
+            document.getElementById('a4_signature').innerHTML = "";
             document.getElementById('saisie_nom_civil').innerHTML = "";
             document.getElementById('saisie_taille').innerHTML = "";
             document.getElementById('saisie_occu').innerHTML = "";
@@ -560,14 +762,15 @@
             
             currentAmende = 0; currentPeine = 0; updateTotals();
         }
-
         function updateA4Visibility() {
             if(CONFIG[currentType].isSaisie) return;
             const conf = CONFIG[currentType];
             const vCount = document.getElementById('paper_victimes').children.length;
             const tCount = document.getElementById('paper_temoins').children.length;
+            const sCount = document.getElementById('paper_suspects').children.length;
+
             toggleElementA4('a4_victimes', conf.showVictimes && vCount > 0);
-            toggleElementA4('a4_suspects', true); 
+            toggleElementA4('a4_suspects', sCount > 0 || !conf.isInvestigation); // Toujours affiché sauf investigation vide
             toggleElementA4('a4_temoins', conf.showTemoins && tCount > 0);
         }
 
@@ -630,17 +833,20 @@
 
         function appendSuspect(name) {
             const li = createLi(name, 'updateSuspectNumbers(); updateA4Visibility()');
-            li.innerHTML = `<strong></strong> ` + li.innerHTML;
+            if(!CONFIG[currentType].isInvestigation) {
+                li.innerHTML = `<strong></strong> ` + li.innerHTML;
+            }
             document.getElementById('paper_suspects').appendChild(li);
             updateSuspectNumbers();
             updateA4Visibility();
         }
 
         function updateSuspectNumbers() {
-            if(CONFIG[currentType].isSaisie) return;
+            if(CONFIG[currentType].isSaisie || CONFIG[currentType].isInvestigation) return;
             const prefix = CONFIG[currentType].labelSuspect.replace('(S) IMPLIQUÉ(S) :', '').replace('(ES) :', ''); 
             document.querySelectorAll('#paper_suspects li').forEach((li, index) => {
-                li.querySelector('strong').innerText = `${prefix.trim()}(e) ${index + 1} : `;
+                const strong = li.querySelector('strong');
+                if(strong) strong.innerText = `${prefix.trim()}(e) ${index + 1} : `;
             });
         }
 
@@ -694,6 +900,39 @@
             }
         }
 
+        // --- GESTION EXPORT & PAGINATION DYNAMIQUE ---
+        async function captureAndSlice(element, baseFilename) {
+            const options = { scale: 3, useCORS: true, backgroundColor: "#ffffff" }; // A4 est blanc
+            const canvas = await html2canvas(element, options);
+            
+            const a4Ratio = 297 / 210; // Ratio standard A4
+            const sliceHeight = Math.floor(canvas.width * a4Ratio); // Hauteur d'un A4 en px
+            
+            // Si l'image tient dans un A4 avec une petite marge, on ne coupe pas
+            if (canvas.height <= sliceHeight * 1.05) { 
+                download(canvas, `${baseFilename}.jpg`);
+            } else {
+                // Découpage en plusieurs pages
+                let currentY = 0;
+                let pageNum = 1;
+                while (currentY < canvas.height) {
+                    const h = Math.min(sliceHeight, canvas.height - currentY);
+                    const sliceCanvas = document.createElement('canvas');
+                    sliceCanvas.width = canvas.width;
+                    sliceCanvas.height = h;
+                    const ctx = sliceCanvas.getContext('2d');
+                    ctx.fillStyle = "#ffffff";
+                    ctx.fillRect(0, 0, sliceCanvas.width, sliceCanvas.height);
+                    ctx.drawImage(canvas, 0, currentY, canvas.width, h, 0, 0, canvas.width, h);
+                    
+                    download(sliceCanvas, `${baseFilename}_Partie${pageNum}.jpg`);
+                    
+                    currentY += sliceHeight;
+                    pageNum++;
+                }
+            }
+        }
+
         async function exportTwoPages() {
             const docId = document.getElementById('doc_id').innerText || "000";
             const docType = CONFIG[currentType].title;
@@ -703,15 +942,24 @@
                 const textBrut = document.getElementById('saisie_nom_civil').innerText.trim();
                 nomCivil = textBrut.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_-]/g, '');
                 if (!nomCivil) nomCivil = "INCONNU";
+            } else if (CONFIG[currentType].isInvestigation) {
+                const textBrut = document.getElementById('a4_inves_target').innerText.trim();
+                nomCivil = textBrut.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_-]/g, '');
+                if (!nomCivil) nomCivil = "INCONNU";
             }
 
-            // --- PRESSE-PAPIER DISCORD (AVEC MENTION) ---
             let textePressePapier = `<@&1468889483872043143>\n`;
             if (CONFIG[currentType].isSaisie) {
                 textePressePapier += `**📋 ${docType}**\n`;
                 const formattedName = document.getElementById('saisie_nom_civil').innerText.trim();
                 textePressePapier += `**👤 Nom :** ${formattedName || 'Inconnu'}\n`;
                 textePressePapier += `**Fiche d'identification civile mise à jour.**`;
+            } else if (CONFIG[currentType].isInvestigation) {
+                textePressePapier += `**📋 ${docType}**\n`;
+                const cible = document.getElementById('a4_inves_target').innerText.trim();
+                const agents = Array.from(document.querySelectorAll('#paper_agents li span.editable-zone')).map(s => s.innerText.trim()).join(', ');
+                textePressePapier += `**🎯 Cible / Sujet :** ${cible || 'Inconnu'}\n`;
+                textePressePapier += `**👮 Agents impliqués :** ${agents || 'Aucun'}\n`;
             } else {
                 textePressePapier += `**📋 ${docType} - N°${docId}**\n`;
                 const agents = Array.from(document.querySelectorAll('#paper_agents li span.editable-zone')).map(s => s.innerText.trim()).join(', ');
@@ -730,22 +978,24 @@
                 navigator.clipboard.writeText(textePressePapier).catch(e => console.log("Copie ignorée", e));
             }
 
-            // --- EXPORT IMAGE ---
             document.body.classList.add('exporting');
             
             try {
-                const options = { scale: 3, useCORS: true, backgroundColor: "#2c3e50" };
-                const c1 = await html2canvas(document.getElementById('page1'), options);
-                
-                let nomFichier = `${currentType}_${docId}_P1.jpg`;
+                let nomBaseFichier = `${currentType}_${docId}_P1`;
                 if (CONFIG[currentType].isSaisie) {
-                    nomFichier = `SAISIE_${nomCivil}_P1.jpg`;
+                    nomBaseFichier = `SAISIE_${nomCivil}_P1`;
+                } else if (CONFIG[currentType].isInvestigation) {
+                    nomBaseFichier = `INVESTIGATION_${nomCivil}_P1`;
                 }
-                download(c1, nomFichier);
+                
+                // Export page 1 avec découpage potentiel si trop long
+                await captureAndSlice(document.getElementById('page1'), nomBaseFichier);
 
+                // Export page 2 (Preuves) si non vide
                 if (!CONFIG[currentType].isSaisie && document.getElementById('evidence_gallery').children.length > 0) {
-                    const c2 = await html2canvas(document.getElementById('page2'), options);
-                    download(c2, `${currentType}_${docId}_P2.jpg`);
+                    let nomPreuve = `${currentType}_${docId}_P2`;
+                    if(CONFIG[currentType].isInvestigation) nomPreuve = `INVESTIGATION_${nomCivil}_P2`;
+                    await captureAndSlice(document.getElementById('page2'), nomPreuve);
                 }
             } catch (e) {
                 console.error(e);
