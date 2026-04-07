@@ -78,6 +78,17 @@
             .sidebar { width: 100% !important; max-width: 500px; }
         }
 
+        /* --- RESPONSIVE TELEPHONE --- */
+        @media (max-width: 600px) {
+            body { padding: 10px; }
+            .sidebar { position: static; width: 100% !important; max-width: 100%; }
+            .controls { padding: 15px; }
+            .tabs { grid-template-columns: 1fr 1fr; }
+            .flex-row { flex-direction: column; gap: 8px; }
+            .flex-row button, .flex-row input { width: 100%; padding: 12px; }
+            .manual-box { padding: 10px; }
+        }
+
         .sidebar {
             width: 360px;
             flex-shrink: 0;
@@ -327,11 +338,11 @@
 
                 <div style="display: flex; gap: 10px; margin-top: 20px;">
                     <button id="btn_export_jpg" onclick="exportTwoPages()" style="background:var(--warning); height:50px; flex: 3; font-size: 1.1em; border-radius: 8px;">EXPORTER</button>
-                    <button onclick="exportImportData()" style="background:#8e44ad; height:50px; flex: 1; font-size: 1.2em; border-radius: 8px;" title="Sauvegarder / Charger (Presse-papier)">💾 I/O</button>
+                    <button onclick="exportImportData()" style="background:#e2e8f0; height:50px; flex: 1; font-size: 1.2em; border-radius: 8px;" title="Sauvegarder / Charger (Presse-papier)">💾</button>
                 </div>
                 
-                <button onclick="fullClear()" style="background:#c0392b; height:35px; margin-top:10px; font-size: 0.9em; border-radius: 8px; opacity: 0.9;">🗑️ TOUT EFFACER</button>
-                <button onclick="openBlankTab()" style="background:#3498db; height:35px; margin-top:10px; font-size: 0.9em; border-radius: 8px;">📄 NOUVEL ONGLET VIERGE</button>
+                <button onclick="fullClear()" style="background:#c0392b; height:35px; margin-top:10px; font-size: 0.9em; border-radius: 8px; opacity: 0.9;">🗑️ EFFACER</button>
+                <button onclick="openBlankTab()" style="background:#3498db; height:35px; margin-top:10px; font-size: 0.9em; border-radius: 8px;">📄 NOUVEL ONGLET</button>
             </div>
         </div>
 
@@ -414,7 +425,7 @@
                 </div>
 
                 <div class="signature-box" style="border: 2px solid #000; padding: 12px; background: #fff;">
-                    <div style="font-weight: bold; letter-spacing: 1px; font-size: 0.85em; text-transform: uppercase; margin-bottom: 8px; border-bottom: 1px dashed #999; padding-bottom: 4px; pointer-events: none;">Signature de l'Officier</div>
+                    <div style="font-weight: bold; letter-spacing: 1px; font-size: 0.85em; text-transform: uppercase; margin-bottom: 8px; border-bottom: 1px dashed #999; padding-bottom: 4px; pointer-events: none;">Signature de l'Agent</div>
                     <div id="a4_signature" class="editable-zone no-underline" contenteditable="true" style="display:block; font-style:italic; font-family:'Brush Script MT', cursive; font-size:1.5em; min-height: 45px; outline: none;"></div>
                 </div>
             </div>
@@ -460,7 +471,9 @@
             }
         };
 
-        let currentType = 'INCIDENT';
+        // VARIABLES GLOBALES (ISOLATION DES DONNÉES)
+        let stateData = {};
+        let currentType = null;
         let currentAmende = 0;
         let currentPeine = 0;
 
@@ -482,175 +495,103 @@
             
             document.getElementById('doc_id').addEventListener('input', updateTabTitle);
             
-            switchReportType('INCIDENT'); 
+            clearAllData(); // Remplit la date auto et prépare le DOM initial
+            switchReportType('INCIDENT'); // Switch et sauvegarde le DOM dans la mémoire d'INCIDENT
 
-            // --- MASQUAGE DU LOADER ---
             setTimeout(() => {
                 document.getElementById('loader').classList.add('hidden');
-            }, 600); // Délai de 0.6s pour fluidifier l'affichage
+            }, 600); 
         };
 
-        // GESTION DU COLLAGE D'IMAGES (Ctrl+V)
-        document.addEventListener('paste', function(e) {
-            const items = e.clipboardData.items;
-            let imageFile = null;
-            for (let i = 0; i < items.length; i++) {
-                if (items[i].type.indexOf('image') !== -1) {
-                    imageFile = items[i].getAsFile();
-                    break;
-                }
-            }
-            
-            if (imageFile) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    const active = document.activeElement;
-                    if (active && active.id === 'saisie_photo_profil') {
-                        active.innerHTML = `<img src="${event.target.result}" style="width:100%; height:100%; object-fit:contain; background:#fff;">`;
-                    } else if (active && active.id === 'saisie_photo_id') {
-                        active.innerHTML = `<img src="${event.target.result}" style="width:100%; height:100%; object-fit:contain; background:#fff;">`;
-                    } else {
-                        // Ajouter à la galerie de preuves
-                        const div = document.createElement('div');
-                        div.className = "evidence-item";
-                        div.innerHTML = `<img src="${event.target.result}"><span class="remove-btn" style="position:absolute; top:5px; right:5px; background:white; border-radius:50%; padding:0 5px;" onclick="this.parentElement.remove();">✘</span><div class="editable-zone no-underline" contenteditable="true" style="display:block; text-align:center; font-size:0.8em;">Description...</div>`;
-                        document.getElementById('evidence_gallery').appendChild(div);
-                    }
-                };
-                reader.readAsDataURL(imageFile);
-            }
-        });
-
-        // SAUVEGARDE ET CHARGEMENT VIA PRESSE-PAPIER
-        function exportImportData() {
-            let action = prompt("TAPEZ 'E' POUR EXPORTER OU 'I' POUR IMPORTER :\n(E = Copier les données actuelles / I = Coller des données)");
-            if(!action) return;
-            
-            action = action.toLowerCase().trim();
-            if(action === 'e' || action === 'exporter') {
-                const data = {
-                    type: currentType,
-                    html_agents: document.getElementById('paper_agents').innerHTML,
-                    html_victimes: document.getElementById('paper_victimes').innerHTML,
-                    html_suspects: document.getElementById('paper_suspects').innerHTML,
-                    html_temoins: document.getElementById('paper_temoins').innerHTML,
-                    html_infractions: document.getElementById('paper_infractions').innerHTML,
-                    html_evidence: document.getElementById('evidence_gallery').innerHTML,
-                    zones: {}
-                };
-                document.querySelectorAll('.editable-zone').forEach((el, index) => {
-                    data.zones[index] = el.innerHTML;
-                });
+        // --- GESTION DE L'ISOLATION DES ONGLETS (SAUVEGARDE & RESTAURATION) ---
+        function saveCurrentState() {
+            if (!currentType) return;
+            stateData[currentType] = {
+                agents: document.getElementById('paper_agents').innerHTML,
+                victimes: document.getElementById('paper_victimes').innerHTML,
+                suspects: document.getElementById('paper_suspects').innerHTML,
+                temoins: document.getElementById('paper_temoins').innerHTML,
+                infractions: document.getElementById('paper_infractions').innerHTML,
+                gallery: document.getElementById('evidence_gallery').innerHTML,
+                recit: document.getElementById('a4_recit').innerHTML,
+                obs: document.getElementById('a4_obs_text').innerHTML,
+                signature: document.getElementById('a4_signature').innerHTML,
+                amende: currentAmende,
+                peine: currentPeine,
+                doc_id: document.getElementById('doc_id').innerText,
                 
-                if (CONFIG[currentType].isSaisie) {
-                    data.saisie_profil = document.getElementById('saisie_photo_profil').innerHTML;
-                    data.saisie_id = document.getElementById('saisie_photo_id').innerHTML;
-                }
-                
-                const b64 = btoa(encodeURIComponent(JSON.stringify(data)));
-                if (navigator.clipboard && navigator.clipboard.writeText) {
-                    navigator.clipboard.writeText(b64).then(() => alert("✅ Code de sauvegarde copié dans le presse-papier !\nVous pourrez le recharger plus tard."));
-                } else {
-                    prompt("Copiez manuellement ce code :", b64);
-                }
+                saisie_nom: document.getElementById('saisie_nom_civil').innerHTML,
+                saisie_taille: document.getElementById('saisie_taille').innerHTML,
+                saisie_occu: document.getElementById('saisie_occu').innerHTML,
+                saisie_permis: document.getElementById('saisie_permis').innerHTML,
+                saisie_aff: document.getElementById('saisie_aff').innerHTML,
+                saisie_casier: document.getElementById('saisie_casier').innerHTML,
+                saisie_dossiers: document.getElementById('saisie_dossiers').innerHTML,
+                saisie_photo_profil: document.getElementById('saisie_photo_profil').innerHTML,
+                saisie_photo_id: document.getElementById('saisie_photo_id').innerHTML,
 
-            } else if(action === 'i' || action === 'importer') {
-                let code = prompt("Collez le code de sauvegarde ici :");
-                if(code) {
-                    try {
-                        const data = JSON.parse(decodeURIComponent(atob(code)));
-                        switchReportType(data.type);
-                        document.getElementById('paper_agents').innerHTML = data.html_agents;
-                        document.getElementById('paper_victimes').innerHTML = data.html_victimes;
-                        document.getElementById('paper_suspects').innerHTML = data.html_suspects;
-                        document.getElementById('paper_temoins').innerHTML = data.html_temoins;
-                        document.getElementById('paper_infractions').innerHTML = data.html_infractions;
-                        document.getElementById('evidence_gallery').innerHTML = data.html_evidence;
-                        
-                        document.querySelectorAll('.editable-zone').forEach((el, index) => {
-                            if(data.zones[index] !== undefined) el.innerHTML = data.zones[index];
-                        });
-                        
-                        if(data.saisie_profil) document.getElementById('saisie_photo_profil').innerHTML = data.saisie_profil;
-                        if(data.saisie_id) document.getElementById('saisie_photo_id').innerHTML = data.saisie_id;
-                        
-                        // Recalcul totals
-                        currentAmende = parseInt(document.getElementById('total_amende').innerText.replace(/\D/g,'')) || 0;
-                        currentPeine = parseInt(document.getElementById('total_peine').innerText) || 0;
-                        
-                        updateA4Visibility();
-                        alert("✅ Données importées avec succès !");
-                    } catch(e) {
-                        alert("❌ Erreur : Code invalide ou corrompu.");
-                    }
-                }
-            }
+                inves_target: document.getElementById('a4_inves_target').innerHTML
+            };
         }
 
-        function updateTabTitle() {
-            const docId = document.getElementById('doc_id').innerText.trim() || "000";
-            document.title = `${CONFIG[currentType].title} - ${docId}`;
-        }
+        function restoreState(type) {
+            const d = stateData[type];
+            document.getElementById('paper_agents').innerHTML = d.agents;
+            document.getElementById('paper_victimes').innerHTML = d.victimes;
+            document.getElementById('paper_suspects').innerHTML = d.suspects;
+            document.getElementById('paper_temoins').innerHTML = d.temoins;
+            document.getElementById('paper_infractions').innerHTML = d.infractions;
+            document.getElementById('evidence_gallery').innerHTML = d.gallery;
+            document.getElementById('a4_recit').innerHTML = d.recit;
+            document.getElementById('a4_obs_text').innerHTML = d.obs;
+            document.getElementById('a4_signature').innerHTML = d.signature;
+            
+            currentAmende = d.amende;
+            currentPeine = d.peine;
+            document.getElementById('total_amende').innerText = currentAmende.toLocaleString();
+            document.getElementById('total_peine').innerText = currentPeine;
+            
+            document.getElementById('doc_id').innerText = d.doc_id;
+            
+            document.getElementById('saisie_nom_civil').innerHTML = d.saisie_nom;
+            document.getElementById('saisie_taille').innerHTML = d.saisie_taille;
+            document.getElementById('saisie_occu').innerHTML = d.saisie_occu;
+            document.getElementById('saisie_permis').innerHTML = d.saisie_permis;
+            document.getElementById('saisie_aff').innerHTML = d.saisie_aff;
+            document.getElementById('saisie_casier').innerHTML = d.saisie_casier;
+            document.getElementById('saisie_dossiers').innerHTML = d.saisie_dossiers;
+            document.getElementById('saisie_photo_profil').innerHTML = d.saisie_photo_profil;
+            document.getElementById('saisie_photo_id').innerHTML = d.saisie_photo_id;
 
-        function openBlankTab() {
-            window.open(window.location.pathname, '_blank');
-        }
-
-        function fullClear() {
-            if (confirm("Voulez-vous vraiment effacer tout le document ?")) {
-                switchReportType(currentType);
-            }
-        }
-
-        function setSectionDisabled(id, isDisabled) {
-            const el = document.getElementById(id);
-            if (el) {
-                isDisabled ? el.classList.add('section-disabled') : el.classList.remove('section-disabled');
-            }
-        }
-
-        function toggleElementA4(id, show) {
-            const el = document.getElementById(id);
-            if (el) { show ? el.classList.remove('d-none') : el.classList.add('d-none'); }
-        }
-
-        function updateInvesMotif() {
-            const val = document.getElementById('sel_inves_motif').value;
-            const target = document.getElementById('a4_inves_target');
-            if (val === 'Autre') {
-                target.innerText = 'Saisie manuelle...';
-            } else {
-                target.innerText = val;
-            }
+            document.getElementById('a4_inves_target').innerHTML = d.inves_target;
         }
 
         function switchReportType(type) {
+            // On sauvegarde l'état de l'onglet qu'on s'apprête à quitter
+            if (currentType) {
+                saveCurrentState();
+            }
+
             currentType = type;
             const conf = CONFIG[type];
 
+            // Changement visuel des boutons
             document.querySelectorAll('.tabs button').forEach(btn => btn.classList.remove('active'));
             document.getElementById(`tab_${type}`).classList.add('active');
 
-            // On vide tout d'abord
-            clearAllData();
-            
-            // --- AJOUT DE LA CORRECTION ICI ---
-            // On définit le texte des observations APRES avoir vidé les données
-            if (type === 'PLAINTE' || type === 'INVESTIGATION') {
-                document.getElementById('a4_obs_text').innerHTML = ""; 
+            // --- Logique d'Isolation ---
+            // Si on a déjà des données enregistrées pour ce mode, on les restaure.
+            // Sinon, c'est la première fois qu'on ouvre cet onglet, donc on initialise avec la page vierge.
+            if (stateData[type]) {
+                restoreState(type);
             } else {
-                document.getElementById('a4_obs_text').innerHTML = "Amende appliquée et réglée le ***.";
+                clearAllData(); 
+                if (conf.clearDocId) document.getElementById('doc_id').innerText = "";
             }
-            // ----------------------------------
 
+            // Affichage Labels & Visibilité
             document.getElementById('ui_panel_title').innerText = `Dossier - ${type.charAt(0) + type.slice(1).toLowerCase()}`;
             document.getElementById('doc_main_title').innerText = conf.title;
-            
-            if (conf.clearDocId) document.getElementById('doc_id').innerText = "";
-            else {
-                const now = new Date();
-                document.getElementById('doc_id').innerText = String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0') + String(now.getHours()).padStart(2, '0');
-            }
             updateTabTitle();
 
             if (conf.labelDoc === "") {
@@ -683,8 +624,6 @@
             if (conf.isInvestigation) {
                 document.getElementById('sec_investigation').classList.remove('d-none');
                 document.getElementById('a4_investigation_motif_box').classList.remove('d-none');
-                document.getElementById('sel_inves_motif').value = 'Lieu';
-                updateInvesMotif();
             } else {
                 document.getElementById('sec_investigation').classList.add('d-none');
                 document.getElementById('a4_investigation_motif_box').classList.add('d-none');
@@ -743,10 +682,17 @@
             document.getElementById('sel_agent').value = '';
             document.getElementById('sel_infraction').value = '';
             
-            document.getElementById('a4_recit').innerHTML = "Date : <br>Heure : <br>Lieu : <br><br>Déroulement :";
+            // Date Automatique
+            const now = new Date();
+            const d = String(now.getDate()).padStart(2, '0');
+            const m = String(now.getMonth() + 1).padStart(2, '0');
+            const y = now.getFullYear();
+            const h = String(now.getHours()).padStart(2, '0');
+            const min = String(now.getMinutes()).padStart(2, '0');
             
-            // --- LIGNE SUPPRIMÉE ICI POUR ÉVITER LE BUG ---
-            // document.getElementById('a4_obs_text').innerHTML = "..."; 
+            document.getElementById('doc_id').innerText = m + d + h; 
+            document.getElementById('a4_recit').innerHTML = `Date : ${d}/${m}/${y}<br>Heure : ${h}h${min}<br>Lieu : <br><br>Déroulement :`;
+            document.getElementById('a4_obs_text').innerHTML = "Amende appliquée et réglée le ***.";
             
             document.getElementById('a4_signature').innerHTML = "";
             document.getElementById('saisie_nom_civil').innerHTML = "";
@@ -757,11 +703,155 @@
             document.getElementById('saisie_casier').innerHTML = "Vierge.";
             document.getElementById('saisie_dossiers').innerHTML = "N/A";
             
-            document.getElementById('saisie_photo_profil').innerHTML = "PHOTO<br>PROFIL";
-            document.getElementById('saisie_photo_id').innerHTML = "PHOTO CARTE D'IDENTITÉ";
+            document.getElementById('saisie_photo_profil').innerHTML = "PHOTO<br>PROFIL<br><br><span style=\"font-size:0.8em\">(Focus + Ctrl V)</span>";
+            document.getElementById('saisie_photo_id').innerHTML = "PHOTO CARTE D'IDENTITÉ <br> (Sélectionnez le cadre et faites Ctrl+V)";
             
             currentAmende = 0; currentPeine = 0; updateTotals();
         }
+
+        // GESTION DU COLLAGE D'IMAGES (Ctrl+V)
+        document.addEventListener('paste', function(e) {
+            const items = e.clipboardData.items;
+            let imageFile = null;
+            for (let i = 0; i < items.length; i++) {
+                if (items[i].type.indexOf('image') !== -1) {
+                    imageFile = items[i].getAsFile();
+                    break;
+                }
+            }
+            
+            if (imageFile) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const active = document.activeElement;
+                    if (active && active.id === 'saisie_photo_profil') {
+                        active.innerHTML = `<img src="${event.target.result}" style="width:100%; height:100%; object-fit:contain; background:#fff;">`;
+                    } else if (active && active.id === 'saisie_photo_id') {
+                        active.innerHTML = `<img src="${event.target.result}" style="width:100%; height:100%; object-fit:contain; background:#fff;">`;
+                    } else {
+                        const div = document.createElement('div');
+                        div.className = "evidence-item";
+                        div.innerHTML = `<img src="${event.target.result}"><span class="remove-btn" style="position:absolute; top:5px; right:5px; background:white; border-radius:50%; padding:0 5px;" onclick="this.parentElement.remove();">✘</span><div class="editable-zone no-underline" contenteditable="true" style="display:block; text-align:center; font-size:0.8em;">...</div>`;
+                        document.getElementById('evidence_gallery').appendChild(div);
+                    }
+                };
+                reader.readAsDataURL(imageFile);
+            }
+        });
+
+        // SAUVEGARDE ET CHARGEMENT VIA PRESSE-PAPIER
+        function exportImportData() {
+            let action = prompt("TAPEZ 'E' POUR EXPORTER OU 'I' POUR IMPORTER :\n(E = Copier les données actuelles / I = Coller des données)");
+            if(!action) return;
+            
+            action = action.toLowerCase().trim();
+            if(action === 'e' || action === 'exporter') {
+                const data = {
+                    type: currentType,
+                    html_agents: document.getElementById('paper_agents').innerHTML,
+                    html_victimes: document.getElementById('paper_victimes').innerHTML,
+                    html_suspects: document.getElementById('paper_suspects').innerHTML,
+                    html_temoins: document.getElementById('paper_temoins').innerHTML,
+                    html_infractions: document.getElementById('paper_infractions').innerHTML,
+                    html_evidence: document.getElementById('evidence_gallery').innerHTML,
+                    zones: {}
+                };
+                document.querySelectorAll('.editable-zone').forEach((el, index) => {
+                    data.zones[index] = el.innerHTML;
+                });
+                
+                if (CONFIG[currentType].isSaisie) {
+                    data.saisie_profil = document.getElementById('saisie_photo_profil').innerHTML;
+                    data.saisie_id = document.getElementById('saisie_photo_id').innerHTML;
+                }
+                
+                const b64 = btoa(encodeURIComponent(JSON.stringify(data)));
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(b64).then(() => alert("✅ Code de sauvegarde copié dans le presse-papier !\nVous pourrez le recharger plus tard."));
+                } else {
+                    prompt("Copiez manuellement ce code :", b64);
+                }
+
+            } else if(action === 'i' || action === 'importer') {
+                let code = prompt("Collez le code de sauvegarde ici :");
+                if(code) {
+                    try {
+                        const data = JSON.parse(decodeURIComponent(atob(code)));
+                        switchReportType(data.type);
+                        
+                        document.getElementById('paper_agents').innerHTML = data.html_agents;
+                        document.getElementById('paper_victimes').innerHTML = data.html_victimes;
+                        document.getElementById('paper_suspects').innerHTML = data.html_suspects;
+                        document.getElementById('paper_temoins').innerHTML = data.html_temoins;
+                        document.getElementById('paper_infractions').innerHTML = data.html_infractions;
+                        document.getElementById('evidence_gallery').innerHTML = data.html_evidence;
+                        
+                        document.querySelectorAll('.editable-zone').forEach((el, index) => {
+                            if(data.zones[index] !== undefined) el.innerHTML = data.zones[index];
+                        });
+                        
+                        if(data.saisie_profil) document.getElementById('saisie_photo_profil').innerHTML = data.saisie_profil;
+                        if(data.saisie_id) document.getElementById('saisie_photo_id').innerHTML = data.saisie_id;
+                        
+                        currentAmende = parseInt(document.getElementById('total_amende').innerText.replace(/\D/g,'')) || 0;
+                        currentPeine = parseInt(document.getElementById('total_peine').innerText) || 0;
+                        
+                        saveCurrentState(); // Enregistre les données fraichement importées dans la mémoire de l'onglet
+                        updateA4Visibility();
+                        alert("✅ Données importées avec succès !");
+                    } catch(e) {
+                        alert("❌ Erreur : Code invalide ou corrompu.");
+                    }
+                }
+            }
+        }
+
+        function updateTabTitle() {
+            const docId = document.getElementById('doc_id').innerText.trim();
+            if (CONFIG[currentType].labelDoc === "") {
+                document.title = `${CONFIG[currentType].title}`;
+            } else {
+                document.title = `${CONFIG[currentType].title} - ${docId || "000"}`;
+            }
+        }
+
+        function openBlankTab() {
+            window.open(window.location.pathname, '_blank');
+        }
+
+        function fullClear() {
+            if (confirm("Voulez-vous vraiment effacer tout le document ?")) {
+                clearAllData();
+                const conf = CONFIG[currentType];
+                if (conf.clearDocId) document.getElementById('doc_id').innerText = "";
+                saveCurrentState(); // Écrase la sauvegarde avec le document vide
+                updateA4Visibility();
+                updateTabTitle();
+            }
+        }
+
+        function setSectionDisabled(id, isDisabled) {
+            const el = document.getElementById(id);
+            if (el) {
+                isDisabled ? el.classList.add('section-disabled') : el.classList.remove('section-disabled');
+            }
+        }
+
+        function toggleElementA4(id, show) {
+            const el = document.getElementById(id);
+            if (el) { show ? el.classList.remove('d-none') : el.classList.add('d-none'); }
+        }
+
+        function updateInvesMotif() {
+            const val = document.getElementById('sel_inves_motif').value;
+            const target = document.getElementById('a4_inves_target');
+            if (val === 'Autre') {
+                target.innerText = 'Saisie manuelle...';
+            } else {
+                target.innerText = val;
+            }
+        }
+
         function updateA4Visibility() {
             if(CONFIG[currentType].isSaisie) return;
             const conf = CONFIG[currentType];
@@ -770,7 +860,7 @@
             const sCount = document.getElementById('paper_suspects').children.length;
 
             toggleElementA4('a4_victimes', conf.showVictimes && vCount > 0);
-            toggleElementA4('a4_suspects', sCount > 0 || !conf.isInvestigation); // Toujours affiché sauf investigation vide
+            toggleElementA4('a4_suspects', sCount > 0 || !conf.isInvestigation); 
             toggleElementA4('a4_temoins', conf.showTemoins && tCount > 0);
         }
 
@@ -902,17 +992,15 @@
 
         // --- GESTION EXPORT & PAGINATION DYNAMIQUE ---
         async function captureAndSlice(element, baseFilename) {
-            const options = { scale: 3, useCORS: true, backgroundColor: "#ffffff" }; // A4 est blanc
+            const options = { scale: 3, useCORS: true, backgroundColor: "#ffffff" }; 
             const canvas = await html2canvas(element, options);
             
-            const a4Ratio = 297 / 210; // Ratio standard A4
-            const sliceHeight = Math.floor(canvas.width * a4Ratio); // Hauteur d'un A4 en px
+            const a4Ratio = 297 / 210; 
+            const sliceHeight = Math.floor(canvas.width * a4Ratio); 
             
-            // Si l'image tient dans un A4 avec une petite marge, on ne coupe pas
             if (canvas.height <= sliceHeight * 1.05) { 
                 download(canvas, `${baseFilename}.jpg`);
             } else {
-                // Découpage en plusieurs pages
                 let currentY = 0;
                 let pageNum = 1;
                 while (currentY < canvas.height) {
@@ -988,10 +1076,8 @@
                     nomBaseFichier = `INVESTIGATION_${nomCivil}_P1`;
                 }
                 
-                // Export page 1 avec découpage potentiel si trop long
                 await captureAndSlice(document.getElementById('page1'), nomBaseFichier);
 
-                // Export page 2 (Preuves) si non vide
                 if (!CONFIG[currentType].isSaisie && document.getElementById('evidence_gallery').children.length > 0) {
                     let nomPreuve = `${currentType}_${docId}_P2`;
                     if(CONFIG[currentType].isInvestigation) nomPreuve = `INVESTIGATION_${nomCivil}_P2`;
