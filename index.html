@@ -266,7 +266,6 @@
                         <select id="sel_inves_motif" onchange="updateInvesMotif()">
                             <option value="Lieu">Lieu</option>
                             <option value="Groupe Criminel">Groupe Criminel</option>
-                            <option value="Autre">Autre (Saisie manuelle sur fiche)</option>
                         </select>
                     </section>
 
@@ -336,13 +335,12 @@
                     </div>
                 </div>
 
-                <div style="display: flex; gap: 10px; margin-top: 20px;">
-                    <button id="btn_export_jpg" onclick="exportTwoPages()" style="background:var(--warning); height:50px; flex: 3; font-size: 1.1em; border-radius: 8px;">EXPORTER</button>
-                    <button onclick="exportImportData()" style="background:#e2e8f0; height:50px; flex: 1; font-size: 1.2em; border-radius: 8px;" title="Sauvegarder / Charger (Presse-papier)">💾</button>
+                <div style="display: flex; gap: 10px; margin-top: 15px; align-items: center;">
+                    <button onclick="exportImportData()" style="font-size: 1em; background-color: #e2e8f0;" title="Sauvegarder / Charger (Presse-papier)">💾</button>
+                    <button onclick="openBlankTab()" style="font-size: 1em; background-color: #e2e8f0;" title="Nouvel onglet vierge">📄</button>
+                    <button onclick="fullClear()" style="font-size: 1em; background-color: #e2e8f0;" title="Tout effacer">🗑️</button>
                 </div>
-                
-                <button onclick="fullClear()" style="background:#c0392b; height:35px; margin-top:10px; font-size: 0.9em; border-radius: 8px; opacity: 0.9;">🗑️ EFFACER</button>
-                <button onclick="openBlankTab()" style="background:#3498db; height:35px; margin-top:10px; font-size: 0.9em; border-radius: 8px;">📄 NOUVEL ONGLET</button>
+                <button id="btn_export_jpg" onclick="exportTwoPages()" style="background:var(--warning); margin-top: 10px; height:50px; flex: 3; font-size: 1.1em; border-radius: 8px;">EXPORTER</button>                
             </div>
         </div>
 
