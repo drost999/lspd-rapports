@@ -73,15 +73,15 @@
             width: 100%;
         }
 
+        /* --- RESPONSIVE TABLETTE & TELEPHONE --- */
         @media (max-width: 1000px) {
             .main-container { flex-direction: column; align-items: center; }
-            .sidebar { width: 100% !important; max-width: 500px; }
+            .sidebar { width: 100% !important; max-width: 600px; }
         }
 
-        /* --- RESPONSIVE TELEPHONE --- */
         @media (max-width: 600px) {
             body { padding: 10px; }
-            .sidebar { position: static; width: 100% !important; max-width: 100%; }
+            .sidebar { position: static; max-width: 100%; }
             .controls { padding: 15px; }
             .tabs { grid-template-columns: 1fr 1fr; }
             .flex-row { flex-direction: column; gap: 8px; }
@@ -158,10 +158,41 @@
         .section-disabled { display: none !important; }
         .d-none { display: none !important; }
 
-        #export-container { display: flex; flex-direction: column; gap: 40px; font-family: 'Times New Roman', Times, serif; color: #111;}
+        /* BOUTONS OUTILS (Sauvegarde, Page, Poubelle) */
+        .btn-icon {
+            background: #e2e8f0;
+            color: #34495e;
+            height: 45px;
+            flex: 1;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-icon:hover { background: #cbd5e0; transform: translateY(-2px); }
+        
+        .btn-icon-danger { color: #c0392b; background: #fadbd8; }
+        .btn-icon-danger:hover { background: #f5b7b1; color: #a93226; }
+
+        /* GESTION FEUILLE A4 */
+        #export-container { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 40px; 
+            font-family: 'Times New Roman', Times, serif; 
+            color: #111;
+            max-width: 100vw;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
         
         .page-a4 {
             width: 210mm; 
+            min-width: 210mm; 
             min-height: 297mm; 
             height: auto; 
             background: white; 
@@ -322,25 +353,33 @@
 
                 <div id="ctrl_saisie" class="d-none">
                     <section>
-                        <label>Photo de Profil (Fichier ou Ctrl+V) :</label>
+                        <label>Photo de Profil :</label>
                         <input type="file" accept="image/*" onchange="loadPhotoSaisie(this, 'saisie_photo_profil')">
                     </section>
                     <section>
-                        <label>Photo Carte d'Identité (Fichier ou Ctrl+V) :</label>
+                        <label>Photo Carte d'Identité :</label>
                         <input type="file" accept="image/*" onchange="loadPhotoSaisie(this, 'saisie_photo_id')">
                     </section>
-                    <div class="manual-box" style="text-align: center; font-size: 0.9em;">
-                        <strong>Note :</strong> Remplissez les champs (Nom, Âge, Casier...) directement en cliquant sur la feuille A4 à droite.<br><br>
-                        <em>Astuce : Cliquez sur le cadre de la photo sur la feuille et faites Ctrl+V pour coller une image copiée.</em>
+                    
+                    <div class="manual-box" style="margin-top: 10px;">
+                        <label>🚗 AJOUTER UN VÉHICULE</label>
+                        <input type="text" id="saisie_veh_model" placeholder="Modèle du véhicule (ex: Zentorno)">
+                        <input type="text" id="saisie_veh_plate" placeholder="Plaque d'immatriculation">
+                        <button onclick="addSaisieVehicle()" style="background:var(--success); margin-top:5px;">Ajouter à la fiche</button>
+                        <div style="font-size:0.75em; margin-top:8px; text-align:center; color:#555;">(Cliquez sur le cadre du véhicule sur la feuille puis faites Ctrl+V pour coller sa photo)</div>
+                    </div>
+
+                    <div class="manual-box" style="text-align: center; font-size: 0.85em; margin-top: 10px;">
+                        <strong>Note :</strong> Remplissez les champs (Nom, Date de Naissance, Email, Observations...) directement sur la feuille A4.
                     </div>
                 </div>
 
-                <div style="display: flex; gap: 10px; margin-top: 10px; align-items: center;">
-                    <button onclick="exportImportData()" style="font-size: 1em; background-color: #e2e8f0;" title="Sauvegarder / Charger (Presse-papier)">💾</button>
-                    <button onclick="openBlankTab()" style="font-size: 1em; background-color: #e2e8f0;" title="Nouvel onglet vierge">📄</button>
-                    <button onclick="fullClear()" style="font-size: 1em; background-color: #e2e8f0;" title="Tout effacer">🗑️</button>
+                <div style="display: flex; gap: 10px; margin-top: 15px; align-items: center;">
+                    <button onclick="exportImportData()" class="btn-icon" title="Sauvegarder / Charger (Presse-papier)">💾</button>
+                    <button onclick="openBlankTab()" class="btn-icon" title="Nouvel onglet vierge">📄</button>
+                    <button onclick="fullClear()" class="btn-icon btn-icon-danger" title="Tout effacer">🗑️</button>
                 </div>
-                <button id="btn_export_jpg" onclick="exportTwoPages()" style="background:var(--warning); margin-top: 10px; height:50px; flex: 3; font-size: 1.1em; border-radius: 8px;">EXPORTER</button>                
+                <button id="btn_export_jpg" onclick="exportTwoPages()" style="background:var(--warning); margin-top: 10px; height:50px; width: 100%; font-size: 1.1em; border-radius: 8px;">EXPORTER</button>                
             </div>
         </div>
 
@@ -394,7 +433,7 @@
                     
                     <div id="a4_observations" class="d-none">
                         <p><strong>OBSERVATIONS :</strong></p>
-                        <div id="a4_obs_text" class="editable-zone" contenteditable="true" style="width:100%; min-height:40px; display:block;">Amende et Garde à vu appliquée et réglée le *** au poste de Mission Row LSPD.</div>
+                        <div id="a4_obs_text" class="editable-zone" contenteditable="true" style="width:100%; min-height:40px; display:block;">Amende appliquée et réglée le ***.</div>
                     </div>
                 </div>
 
@@ -402,6 +441,9 @@
                     <div style="display: flex; gap: 20px; margin-bottom: 20px;">
                         <div style="flex: 1; line-height: 1.8;">
                             <div><strong>NOM / PRÉNOM :</strong> <span class="editable-zone no-underline" id="saisie_nom_civil" contenteditable="true" style="min-width:150px;"></span></div>
+                            <div><strong>DATE DE NAISSANCE :</strong> <span class="editable-zone no-underline" id="saisie_dob" contenteditable="true" style="min-width:100px;"></span></div>
+                            <div><strong>N° TÉLÉPHONE :</strong> <span class="editable-zone no-underline" id="saisie_tel" contenteditable="true" style="min-width:100px;"></span></div>
+                            <div><strong>EMAIL (DISCORD) :</strong> <span class="editable-zone no-underline" id="saisie_email" contenteditable="true" style="min-width:150px;"></span></div>
                             <div><strong>TAILLE :</strong> <span class="editable-zone no-underline" id="saisie_taille" contenteditable="true" style="min-width:50px;"></span> cm</div>
                             <div><strong>OCCUPATION :</strong> <span class="editable-zone no-underline" id="saisie_occu" contenteditable="true" style="min-width:150px;"></span></div>
                             <div><strong>PERMIS POSSÉDÉS :</strong> <span class="editable-zone no-underline" id="saisie_permis" contenteditable="true" style="min-width:150px;">Aucun</span></div>
@@ -416,10 +458,16 @@
                     <div id="saisie_photo_id" class="paste-zone" tabindex="0" style="width: 100%; height: 220px; border: 2px dashed #999; display: flex; align-items: center; justify-content: center; text-align: center; color: #777; background: #fff; overflow: hidden; font-size: 0.9em; margin-bottom: 20px;">PHOTO CARTE D'IDENTITÉ <br> (Sélectionnez le cadre et faites Ctrl+V)</div>
 
                     <p><strong>CASIER JUDICIAIRE :</strong></p>
-                    <div id="saisie_casier" class="editable-zone" contenteditable="true" style="width:100%; min-height:80px; display:block;">Vierge.</div>
+                    <div id="saisie_casier" class="editable-zone" contenteditable="true" style="width:100%; min-height:60px; display:block;">Vierge.</div>
                     
                     <p><strong>DOSSIERS APPARUS (Rapports associés) :</strong></p>
-                    <div id="saisie_dossiers" class="editable-zone" contenteditable="true" style="width:100%; min-height:80px; display:block;">N/A</div>
+                    <div id="saisie_dossiers" class="editable-zone" contenteditable="true" style="width:100%; min-height:60px; display:block;">N/A</div>
+
+                    <p><strong>VÉHICULES POSSÉDÉS :</strong></p>
+                    <div id="saisie_vehicules_list" style="display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;"></div>
+
+                    <p><strong>OBSERVATIONS :</strong></p>
+                    <div id="saisie_observations" class="editable-zone" contenteditable="true" style="width:100%; min-height:60px; display:block; margin-bottom: 20px;">N/A</div>
                 </div>
 
                 <div class="signature-box" style="border: 2px solid #000; padding: 12px; background: #fff;">
@@ -519,6 +567,9 @@
                 doc_id: document.getElementById('doc_id').innerText,
                 
                 saisie_nom: document.getElementById('saisie_nom_civil').innerHTML,
+                saisie_dob: document.getElementById('saisie_dob').innerHTML,
+                saisie_tel: document.getElementById('saisie_tel').innerHTML,
+                saisie_email: document.getElementById('saisie_email').innerHTML,
                 saisie_taille: document.getElementById('saisie_taille').innerHTML,
                 saisie_occu: document.getElementById('saisie_occu').innerHTML,
                 saisie_permis: document.getElementById('saisie_permis').innerHTML,
@@ -527,6 +578,8 @@
                 saisie_dossiers: document.getElementById('saisie_dossiers').innerHTML,
                 saisie_photo_profil: document.getElementById('saisie_photo_profil').innerHTML,
                 saisie_photo_id: document.getElementById('saisie_photo_id').innerHTML,
+                saisie_vehicules_list: document.getElementById('saisie_vehicules_list').innerHTML,
+                saisie_observations: document.getElementById('saisie_observations').innerHTML,
 
                 inves_target: document.getElementById('a4_inves_target').innerHTML
             };
@@ -534,34 +587,39 @@
 
         function restoreState(type) {
             const d = stateData[type];
-            document.getElementById('paper_agents').innerHTML = d.agents;
-            document.getElementById('paper_victimes').innerHTML = d.victimes;
-            document.getElementById('paper_suspects').innerHTML = d.suspects;
-            document.getElementById('paper_temoins').innerHTML = d.temoins;
-            document.getElementById('paper_infractions').innerHTML = d.infractions;
-            document.getElementById('evidence_gallery').innerHTML = d.gallery;
-            document.getElementById('a4_recit').innerHTML = d.recit;
-            document.getElementById('a4_obs_text').innerHTML = d.obs;
-            document.getElementById('a4_signature').innerHTML = d.signature;
+            document.getElementById('paper_agents').innerHTML = d.agents || "";
+            document.getElementById('paper_victimes').innerHTML = d.victimes || "";
+            document.getElementById('paper_suspects').innerHTML = d.suspects || "";
+            document.getElementById('paper_temoins').innerHTML = d.temoins || "";
+            document.getElementById('paper_infractions').innerHTML = d.infractions || "";
+            document.getElementById('evidence_gallery').innerHTML = d.gallery || "";
+            document.getElementById('a4_recit').innerHTML = d.recit || "";
+            document.getElementById('a4_obs_text').innerHTML = d.obs || "";
+            document.getElementById('a4_signature').innerHTML = d.signature || "";
             
-            currentAmende = d.amende;
-            currentPeine = d.peine;
+            currentAmende = d.amende || 0;
+            currentPeine = d.peine || 0;
             document.getElementById('total_amende').innerText = currentAmende.toLocaleString();
             document.getElementById('total_peine').innerText = currentPeine;
             
-            document.getElementById('doc_id').innerText = d.doc_id;
+            document.getElementById('doc_id').innerText = d.doc_id || "";
             
-            document.getElementById('saisie_nom_civil').innerHTML = d.saisie_nom;
-            document.getElementById('saisie_taille').innerHTML = d.saisie_taille;
-            document.getElementById('saisie_occu').innerHTML = d.saisie_occu;
-            document.getElementById('saisie_permis').innerHTML = d.saisie_permis;
-            document.getElementById('saisie_aff').innerHTML = d.saisie_aff;
-            document.getElementById('saisie_casier').innerHTML = d.saisie_casier;
-            document.getElementById('saisie_dossiers').innerHTML = d.saisie_dossiers;
-            document.getElementById('saisie_photo_profil').innerHTML = d.saisie_photo_profil;
-            document.getElementById('saisie_photo_id').innerHTML = d.saisie_photo_id;
+            document.getElementById('saisie_nom_civil').innerHTML = d.saisie_nom || "";
+            document.getElementById('saisie_dob').innerHTML = d.saisie_dob || "";
+            document.getElementById('saisie_tel').innerHTML = d.saisie_tel || "";
+            document.getElementById('saisie_email').innerHTML = d.saisie_email || "";
+            document.getElementById('saisie_taille').innerHTML = d.saisie_taille || "";
+            document.getElementById('saisie_occu').innerHTML = d.saisie_occu || "";
+            document.getElementById('saisie_permis').innerHTML = d.saisie_permis || "";
+            document.getElementById('saisie_aff').innerHTML = d.saisie_aff || "";
+            document.getElementById('saisie_casier').innerHTML = d.saisie_casier || "";
+            document.getElementById('saisie_dossiers').innerHTML = d.saisie_dossiers || "";
+            document.getElementById('saisie_photo_profil').innerHTML = d.saisie_photo_profil || "";
+            document.getElementById('saisie_photo_id').innerHTML = d.saisie_photo_id || "";
+            document.getElementById('saisie_vehicules_list').innerHTML = d.saisie_vehicules_list || "";
+            document.getElementById('saisie_observations').innerHTML = d.saisie_observations || "";
 
-            document.getElementById('a4_inves_target').innerHTML = d.inves_target;
+            document.getElementById('a4_inves_target').innerHTML = d.inves_target || "";
         }
 
         function switchReportType(type) {
@@ -578,13 +636,18 @@
             document.getElementById(`tab_${type}`).classList.add('active');
 
             // --- Logique d'Isolation ---
-            // Si on a déjà des données enregistrées pour ce mode, on les restaure.
-            // Sinon, c'est la première fois qu'on ouvre cet onglet, donc on initialise avec la page vierge.
             if (stateData[type]) {
                 restoreState(type);
             } else {
                 clearAllData(); 
                 if (conf.clearDocId) document.getElementById('doc_id').innerText = "";
+                
+                // Suppression Auto-complétion Observation pour PLAINTE et INVESTIGATION
+                if (type === 'PLAINTE' || type === 'INVESTIGATION') {
+                    document.getElementById('a4_obs_text').innerHTML = "<br>";
+                } else {
+                    document.getElementById('a4_obs_text').innerHTML = "Amende appliquée et réglée le ***.";
+                }
             }
 
             // Affichage Labels & Visibilité
@@ -694,6 +757,9 @@
             
             document.getElementById('a4_signature').innerHTML = "";
             document.getElementById('saisie_nom_civil').innerHTML = "";
+            document.getElementById('saisie_dob').innerHTML = "";
+            document.getElementById('saisie_tel').innerHTML = "";
+            document.getElementById('saisie_email').innerHTML = "";
             document.getElementById('saisie_taille').innerHTML = "";
             document.getElementById('saisie_occu').innerHTML = "";
             document.getElementById('saisie_permis').innerHTML = "Aucun";
@@ -703,11 +769,35 @@
             
             document.getElementById('saisie_photo_profil').innerHTML = "PHOTO<br>PROFIL<br><br><span style=\"font-size:0.8em\">(Focus + Ctrl V)</span>";
             document.getElementById('saisie_photo_id').innerHTML = "PHOTO CARTE D'IDENTITÉ <br> (Sélectionnez le cadre et faites Ctrl+V)";
+            document.getElementById('saisie_vehicules_list').innerHTML = "";
+            document.getElementById('saisie_observations').innerHTML = "N/A";
             
             currentAmende = 0; currentPeine = 0; updateTotals();
         }
 
-        // GESTION DU COLLAGE D'IMAGES (Ctrl+V)
+        // AJOUTER UN VÉHICULE (FICHE DE SAISIE)
+        function addSaisieVehicle() {
+            const model = document.getElementById('saisie_veh_model').value || "Modèle...";
+            const plate = document.getElementById('saisie_veh_plate').value || "Plaque...";
+            
+            const list = document.getElementById('saisie_vehicules_list');
+            const div = document.createElement('div');
+            div.style.cssText = "border: 1px dashed #999; padding: 5px; width: 150px; text-align: center; position: relative; background: #fff;";
+            div.innerHTML = `
+                <div class="paste-zone" tabindex="0" style="width:100%; height:90px; display:flex; align-items:center; justify-content:center; background:#f5f5f5; overflow:hidden; margin-bottom:5px; border: 1px solid #ddd;">
+                    <span style="font-size:0.8em; color:#aaa;">Photo<br>(Focus + Ctrl V)</span>
+                </div>
+                <span class="remove-btn" style="position:absolute; top:2px; right:2px; background:white; border-radius:50%; padding:0 5px; cursor:pointer;" onclick="this.parentElement.remove();">✘</span>
+                <div class="editable-zone no-underline" contenteditable="true" style="font-size:0.85em; font-weight:bold; display:block;">${model}</div>
+                <div class="editable-zone no-underline" contenteditable="true" style="font-size:0.8em; display:block;">${plate}</div>
+            `;
+            list.appendChild(div);
+            
+            document.getElementById('saisie_veh_model').value = '';
+            document.getElementById('saisie_veh_plate').value = '';
+        }
+
+        // GESTION DU COLLAGE D'IMAGES (Ctrl+V) UNIVERSEL
         document.addEventListener('paste', function(e) {
             const items = e.clipboardData.items;
             let imageFile = null;
@@ -722,14 +812,14 @@
                 const reader = new FileReader();
                 reader.onload = (event) => {
                     const active = document.activeElement;
-                    if (active && active.id === 'saisie_photo_profil') {
-                        active.innerHTML = `<img src="${event.target.result}" style="width:100%; height:100%; object-fit:contain; background:#fff;">`;
-                    } else if (active && active.id === 'saisie_photo_id') {
+                    // Si l'utilisateur a cliqué sur n'importe quelle "paste-zone" (Profil, ID, Véhicule)
+                    if (active && active.classList.contains('paste-zone')) {
                         active.innerHTML = `<img src="${event.target.result}" style="width:100%; height:100%; object-fit:contain; background:#fff;">`;
                     } else {
+                        // Sinon, c'est une preuve photo classique pour la page 2
                         const div = document.createElement('div');
                         div.className = "evidence-item";
-                        div.innerHTML = `<img src="${event.target.result}"><span class="remove-btn" style="position:absolute; top:5px; right:5px; background:white; border-radius:50%; padding:0 5px;" onclick="this.parentElement.remove();">✘</span><div class="editable-zone no-underline" contenteditable="true" style="display:block; text-align:center; font-size:0.8em;">...</div>`;
+                        div.innerHTML = `<img src="${event.target.result}"><span class="remove-btn" style="position:absolute; top:5px; right:5px; background:white; border-radius:50%; padding:0 5px;" onclick="this.parentElement.remove();">✘</span><div class="editable-zone no-underline" contenteditable="true" style="display:block; text-align:center; font-size:0.8em;">Description...</div>`;
                         document.getElementById('evidence_gallery').appendChild(div);
                     }
                 };
@@ -761,6 +851,11 @@
                 if (CONFIG[currentType].isSaisie) {
                     data.saisie_profil = document.getElementById('saisie_photo_profil').innerHTML;
                     data.saisie_id = document.getElementById('saisie_photo_id').innerHTML;
+                    data.saisie_dob = document.getElementById('saisie_dob').innerHTML;
+                    data.saisie_tel = document.getElementById('saisie_tel').innerHTML;
+                    data.saisie_email = document.getElementById('saisie_email').innerHTML;
+                    data.saisie_vehicules = document.getElementById('saisie_vehicules_list').innerHTML;
+                    data.saisie_obs = document.getElementById('saisie_observations').innerHTML;
                 }
                 
                 const b64 = btoa(encodeURIComponent(JSON.stringify(data)));
@@ -790,6 +885,11 @@
                         
                         if(data.saisie_profil) document.getElementById('saisie_photo_profil').innerHTML = data.saisie_profil;
                         if(data.saisie_id) document.getElementById('saisie_photo_id').innerHTML = data.saisie_id;
+                        if(data.saisie_dob !== undefined) document.getElementById('saisie_dob').innerHTML = data.saisie_dob;
+                        if(data.saisie_tel !== undefined) document.getElementById('saisie_tel').innerHTML = data.saisie_tel;
+                        if(data.saisie_email !== undefined) document.getElementById('saisie_email').innerHTML = data.saisie_email;
+                        if(data.saisie_vehicules !== undefined) document.getElementById('saisie_vehicules_list').innerHTML = data.saisie_vehicules;
+                        if(data.saisie_obs !== undefined) document.getElementById('saisie_observations').innerHTML = data.saisie_obs;
                         
                         currentAmende = parseInt(document.getElementById('total_amende').innerText.replace(/\D/g,'')) || 0;
                         currentPeine = parseInt(document.getElementById('total_peine').innerText) || 0;
@@ -814,7 +914,8 @@
         }
 
         function openBlankTab() {
-            window.open(window.location.pathname, '_blank');
+            // Utilise l'URL exacte du navigateur pour éviter les cassures de style sur PC local
+            window.open(window.location.href.split('#')[0], '_blank');
         }
 
         function fullClear() {
