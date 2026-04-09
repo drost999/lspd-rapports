@@ -24,13 +24,18 @@ const RP_DATA = {
         { "nom": "Conduite dangereuse (Art. 7)", "amende": 1000, "peine": 10 },
         { "nom": "Conduite dangereuse [Récidive x1]", "amende": 2000, "peine": 20 },
         { "nom": "Conduite dangereuse [Récidive x2]", "amende": 3000, "peine": 30 },
+        { "nom": "Excès de vitesse (> 100km/h)", "amende": 1500, "peine": 0 },
 
         // --- CODE CIVIL - INFRACTIONS MAJEURES ---
         { "nom": "Vol de bien d'autrui (Art. 8)", "amende": 2500, "peine": 20 },
         { "nom": "Vol de bien d'autrui [Récidive x1]", "amende": 5000, "peine": 40 },
+        { "nom": "Vol de véhicule de service public", "amende": 7500, "peine": 50 },
+        { "nom": "Vol de véhicule de service public [Récidive x1]", "amende": 15000, "peine": 100 },
         
         { "nom": "Refus d'obtempérer (Art. 9)", "amende": 3000, "peine": 30 },
         { "nom": "Refus d'obtempérer [Récidive x1]", "amende": 6000, "peine": 60 },
+        { "nom": "Délit de fuite", "amende": 3500, "peine": 35 },
+        { "nom": "Délit de fuite [Récidive x1]", "amende": 7000, "peine": 70 },
 
         { "nom": "Port d'arme illégal : Beretta (Art. 10)", "amende": 5000, "peine": 45 },
         { "nom": "Port d'arme illégal : Glock (Art. 10)", "amende": 9000, "peine": 50 },
