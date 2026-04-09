@@ -107,8 +107,7 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
 
-        .tabs button:nth-child(5), .tabs button:nth-child(6) { grid-column: span 2; }
-
+        /* Retrait du colspan pour uniformiser les 6 boutons en mode 2x3 */
         .tabs button {
             background: #e2e8f0;
             color: var(--accent);
@@ -117,6 +116,7 @@
             border-radius: 6px;
             font-weight: bold;
             transition: 0.2s;
+            height: 100%;
         }
 
         .tabs button.active {
@@ -148,13 +148,19 @@
         .flex-row input { flex: 1; width: 0; min-width: 0; }
         .flex-row button { flex: 1; padding: 8px 4px; font-size: 0.8em;}
 
-        button:disabled, input:disabled, select:disabled {
+        /* CACHER LES BOUTONS DÉSACTIVÉS DANS CONTROLS */
+        .controls button:disabled {
+            display: none !important;
+        }
+
+        input:disabled, select:disabled {
             opacity: 0.4;
             cursor: not-allowed;
             background-color: #e2e8f0 !important;
             color: #718096 !important;
             border-color: #cbd5e0 !important;
         }
+        
         .section-disabled { display: none !important; }
         .d-none { display: none !important; }
 
@@ -215,6 +221,9 @@
         .editable-zone { border-bottom: 1px dashed #999; min-width: 30px; height: auto; display: inline-block; outline: none; transition: background 0.2s; word-break: break-word; }
         .editable-zone:focus { background: #ffffd0; border-bottom: 1px solid #000; }
         
+        /* Classe pour empêcher le texte long sur champs courts */
+        .short-text { white-space: nowrap; overflow: hidden; }
+
         .no-underline { border-bottom: none !important; }
 
         .paper-list { margin: 0; padding-left: 20px; list-style-type: square; }
@@ -238,7 +247,7 @@
             width: 260px; 
             text-align: center; 
             align-self: flex-end; 
-            margin-top: auto !important;
+            margin-top: 40px !important;
             margin-bottom: 20px; 
             z-index: 10; 
             box-sizing: border-box;
@@ -266,6 +275,34 @@
         /* Focus pour le collage d'image */
         .paste-zone { cursor: pointer; transition: 0.2s; }
         .paste-zone:focus { border-color: var(--blue-police) !important; background: #eef7ff !important; outline: none; }
+
+        /* Harmonisation de la fiche de saisie */
+        .saisie-field-row { display: flex; margin-bottom: 5px; align-items: center; }
+        .saisie-field-label { font-weight: bold; width: 190px; flex-shrink: 0; }
+        .saisie-field-value { flex-grow: 1; min-width: 50px; }
+
+        /* NOUVEAU STYLE POUR OBJETS ET SEPARATION */
+        .saisie-top-block {
+            background: #eef2f6; 
+            padding: 15px; 
+            border-left: 5px solid var(--blue-police); 
+            margin-bottom: 25px;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.05);
+        }
+        
+        .saisie-obj-card {
+            border: 1px solid #bdc3c7; 
+            border-radius: 6px; 
+            padding: 10px; 
+            width: 160px; 
+            text-align: center; 
+            position: relative; 
+            background: #ffffff;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
     </style>
 </head>
 <body>
@@ -311,42 +348,23 @@
                         <label id="lbl_ui_civils">Personnes Impliquées :</label>
                         <input type="text" id="sel_civil" list="list_civils" placeholder="Chercher un civil...">
                         <datalist id="list_civils"></datalist>
-                        <div class="flex-row">
-                            <button id="btn_add_victime" onclick="addItem('victime')">+ Victime</button>
+                        <div class="flex-row" style="flex-wrap: wrap;">
+                            <button id="btn_add_victime" onclick="addItem('victime')">+ Vict.</button>
                             <button id="btn_add_suspect" onclick="addItem('suspect')">+ Civil</button>
-                            <button id="btn_add_temoin" onclick="addItem('temoin')">+ Témoin</button>
+                            <button id="btn_add_vrai_suspect" onclick="addItem('vrai_suspect')">+ Susp.</button>
+                            <button id="btn_add_temoin" onclick="addItem('temoin')">+ Tém.</button>
                         </div>
                     </section>
-
-                    <section id="sec_infractions">
-                        <label id="lbl_infraction_title">Délits :</label>
-                        <input type="text" id="sel_infraction" list="list_infractions" placeholder="Chercher un délit...">
-                        <datalist id="list_infractions"></datalist>
-                        <button id="btn_add_infraction" onclick="addItem('infraction')" style="background:var(--success);">Ajouter</button>
-                    </section>
-
-                    <section>
-                        <label>Preuves Photos (Fichier ou Ctrl+V) :</label>
-                        <input type="file" id="file_input" multiple accept="image/*" onchange="handleImages(this)">
-                    </section>
-
+                    
                     <div class="manual-box" id="manual_box_standard">
-                        <label>➕ SAISIE MANUELLE</label>
+                        <label>➕ SAISIE MANUELLE (Civils)</label>
                         <input type="text" id="manual_name" placeholder="Nom Prénom">
                         <div class="flex-row">
                             <button id="btn_man_victime" onclick="addManual('victime')">+ Vict.</button>
                             <button id="btn_man_suspect" onclick="addManual('suspect')">+ Civil</button>
+                            <button id="btn_man_vrai_suspect" onclick="addManual('vrai_suspect')">+ Susp.</button>
                             <button id="btn_man_temoin" onclick="addManual('temoin')">+ Tém.</button>
                             <button id="btn_man_agent" onclick="addManual('agent')">+ Ag.</button>
-                        </div>
-
-                        <div id="sec_manual_infraction" style="margin-top: 10px;">
-                            <input type="text" id="manual_inf_nom" placeholder="Infraction / Motif">
-                            <div class="flex-row" style="margin-top:5px;">
-                                <input type="number" id="manual_inf_prix" placeholder="Amende ($)">
-                                <input type="number" id="manual_inf_peine" placeholder="Peine (M)">
-                            </div>
-                            <button id="btn_man_infraction" onclick="addManual('infraction')" style="background:var(--success); margin-top:5px;">Ajouter</button>
                         </div>
                     </div>
                 </div>
@@ -362,16 +380,45 @@
                     </section>
                     
                     <div class="manual-box" style="margin-top: 10px;">
-                        <label>🚗 AJOUTER UN VÉHICULE</label>
-                        <input type="text" id="saisie_veh_model" placeholder="Modèle du véhicule (ex: Zentorno)">
-                        <input type="text" id="saisie_veh_plate" placeholder="Plaque d'immatriculation">
-                        <button onclick="addSaisieVehicle()" style="background:var(--success); margin-top:5px;">Ajouter à la fiche</button>
-                        <div style="font-size:0.75em; margin-top:8px; text-align:center; color:#555;">(Cliquez sur le cadre du véhicule sur la feuille puis faites Ctrl+V pour coller sa photo)</div>
+                        <label>📦 AJOUTER UN OBJET (Véhicule, Propriété, Arme)</label>
+                        <select id="saisie_obj_type" style="margin-bottom: 5px;">
+                            <option value="🚗 Véhicule">🚗 Véhicule</option>
+                            <option value="🏠 Propriété">🏠 Propriété</option>
+                            <option value="🔫 Arme">🔫 Arme</option>
+                        </select>
+                        <input type="text" id="saisie_obj_nom" placeholder="Modèle / Nom">
+                        <input type="text" id="saisie_obj_desc" placeholder="Détails (Couleur, Type d'arme...)">
+                        <input type="text" id="saisie_obj_id" placeholder="Plaque / N° Série / Commentaire">
+                        <button onclick="addSaisieObject()" style="background:var(--success); margin-top:5px;">Ajouter à la fiche</button>
+                        <div style="font-size:0.75em; margin-top:8px; text-align:center; color:#555;">(Cliquez sur le cadre de l'objet sur la feuille puis faites Ctrl+V pour coller sa photo)</div>
                     </div>
 
                     <div class="manual-box" style="text-align: center; font-size: 0.85em; margin-top: 10px;">
-                        <strong>Note :</strong> Remplissez les champs (Nom, Date de Naissance, Email, Observations...) directement sur la feuille A4.
+                        <strong>Note :</strong> Remplissez les champs (Nom, Date de Naissance, Email, Observations...) directement sur la feuille A4.<br><br>
+                        <span style="color:#c0392b; font-weight:bold;">⛔ NE PAS DEMANDER D'AFFILIATION DURANT LE RECENSEMENT ⛔</span>
                     </div>
+                </div>
+
+                <section id="sec_infractions" style="margin-top: 15px;">
+                    <label id="lbl_infraction_title">Délits :</label>
+                    <input type="text" id="sel_infraction" list="list_infractions" placeholder="Chercher un délit...">
+                    <datalist id="list_infractions"></datalist>
+                    <button id="btn_add_infraction" onclick="addItem('infraction')" style="background:var(--success);">Ajouter</button>
+                </section>
+
+                <section id="sec_preuves_standard" style="margin-top: 15px;">
+                    <label>Preuves Photos (Fichier ou Ctrl+V) :</label>
+                    <input type="file" id="file_input" multiple accept="image/*" onchange="handleImages(this)">
+                </section>
+
+                <div class="manual-box" id="sec_manual_infraction" style="margin-top: 10px;">
+                    <label>➕ SAISIE MANUELLE (Délit)</label>
+                    <input type="text" id="manual_inf_nom" placeholder="Infraction / Motif">
+                    <div class="flex-row" style="margin-top:5px;">
+                        <input type="number" id="manual_inf_prix" placeholder="Amende ($)">
+                        <input type="number" id="manual_inf_peine" placeholder="Peine (M)">
+                    </div>
+                    <button id="btn_man_infraction" onclick="addManual('infraction')" style="background:var(--success); margin-top:5px;">Ajouter Délit</button>
                 </div>
 
                 <div style="display: flex; gap: 10px; margin-top: 15px; align-items: center;">
@@ -387,19 +434,22 @@
             <div class="page-a4" id="page1">
                 <div class="header">
                     <div>POLICE DE LOS SANTOS</div>
-                    <div id="header_doc_id"><span id="doc_type_label">RAPPORT N°</span> <span id="doc_id" class="editable-zone" contenteditable="true"></span></div>
+                    <div id="header_doc_id"><span id="doc_type_label">RAPPORT N°</span> <span id="doc_id" class="editable-zone short-text" contenteditable="true"></span></div>
                 </div>
                 
                 <h1 id="doc_main_title">RAPPORT</h1>
                 
                 <div id="a4_standard_body">
-                    
+                    <div id="a4_arrestation_photo_container" class="d-none" style="float: right; margin: 0 0 15px 20px; z-index: 10;">
+                        <div id="arrestation_photo_profil" class="paste-zone" tabindex="0" style="width: 130px; height: 130px; border: 2px dashed #999; display: flex; align-items: center; justify-content: center; text-align: center; color: #777; background: #fff; overflow: hidden; font-size: 0.8em; padding: 5px;">PHOTO<br>PROFIL<br><br><span style="font-size:0.8em">(Focus + Ctrl V)</span></div>
+                    </div>
+
                     <div id="a4_investigation_motif_box" class="d-none" style="margin-bottom: 15px;">
-                        <p><strong>MOTIF / CIBLE :</strong> <span id="a4_inves_target" class="editable-zone" contenteditable="true" style="min-width:200px;">Lieu</span></p>
+                        <p><strong>MOTIF / CIBLE :</strong> <span id="a4_inves_target" class="editable-zone short-text" contenteditable="true" style="min-width:200px;">Lieu</span></p>
                     </div>
 
                     <div id="a4_agents">
-                        <p><strong>OFFICIER(S) PRÉSENT(S) :</strong></p>
+                        <p><strong>AGENT(S) PRÉSENT(S) :</strong></p>
                         <ul id="paper_agents" class="paper-list"></ul>
                     </div>
 
@@ -413,6 +463,11 @@
                         <ul id="paper_suspects" class="paper-list"></ul>
                     </div>
 
+                    <div id="a4_vrais_suspects" class="d-none">
+                        <p><strong>SUSPECT(S) :</strong></p>
+                        <ul id="paper_vrais_suspects" class="paper-list"></ul>
+                    </div>
+
                     <div id="a4_temoins" class="d-none">
                         <p><strong>TÉMOIN(S) :</strong></p>
                         <ul id="paper_temoins" class="paper-list"></ul>
@@ -424,8 +479,8 @@
                     </div>
 
                     <div id="a4_totals" class="total-section d-none">
-                        <div>AMENDE : $ <span id="total_amende" class="editable-zone" contenteditable="true">0</span></div>
-                        <div>PEINE : <span id="total_peine" class="editable-zone" contenteditable="true">0</span> mois</div>
+                        <div>AMENDE : $ <span id="total_amende" class="editable-zone short-text" contenteditable="true">0</span></div>
+                        <div>PEINE : <span id="total_peine" class="editable-zone short-text" contenteditable="true">0</span> mois</div>
                     </div>
 
                     <p><strong>RÉCIT DES FAITS / DÉROULEMENT :</strong></p>
@@ -438,33 +493,43 @@
                 </div>
 
                 <div id="a4_saisie_body" class="d-none">
-                    <div style="display: flex; gap: 20px; margin-bottom: 20px;">
-                        <div style="flex: 1; line-height: 1.8;">
-                            <div><strong>NOM / PRÉNOM :</strong> <span class="editable-zone no-underline" id="saisie_nom_civil" contenteditable="true" style="min-width:150px;"></span></div>
-                            <div><strong>DATE DE NAISSANCE :</strong> <span class="editable-zone no-underline" id="saisie_dob" contenteditable="true" style="min-width:100px;"></span></div>
-                            <div><strong>N° TÉLÉPHONE :</strong> <span class="editable-zone no-underline" id="saisie_tel" contenteditable="true" style="min-width:100px;"></span></div>
-                            <div><strong>EMAIL (DISCORD) :</strong> <span class="editable-zone no-underline" id="saisie_email" contenteditable="true" style="min-width:150px;"></span></div>
-                            <div><strong>TAILLE :</strong> <span class="editable-zone no-underline" id="saisie_taille" contenteditable="true" style="min-width:50px;"></span> cm</div>
-                            <div><strong>OCCUPATION :</strong> <span class="editable-zone no-underline" id="saisie_occu" contenteditable="true" style="min-width:150px;"></span></div>
-                            <div><strong>PERMIS POSSÉDÉS :</strong> <span class="editable-zone no-underline" id="saisie_permis" contenteditable="true" style="min-width:150px;">Aucun</span></div>
-                            <div><strong>AFFILIATION CRIMINELLE :</strong> <span class="editable-zone no-underline" id="saisie_aff" contenteditable="true" style="min-width:150px;">Aucune / Inconnue</span></div>
-                        </div>
-                        <div style="width: 150px;">
-                            <div id="saisie_photo_profil" class="paste-zone" tabindex="0" style="width: 150px; height: 150px; border: 2px dashed #999; display: flex; align-items: center; justify-content: center; text-align: center; color: #777; background: #fff; overflow: hidden; font-size: 0.8em; padding: 5px;">PHOTO<br>PROFIL<br><br><span style="font-size:0.8em">(Focus + Ctrl V)</span></div>
+                    
+                    <div class="saisie-top-block">
+                        <div style="display: flex; gap: 20px;">
+                            <div style="flex: 1; line-height: 1.8; font-size: 0.95em;">
+                                <div class="saisie-field-row"><div class="saisie-field-label">NOM / PRÉNOM :</div> <div class="editable-zone no-underline short-text saisie-field-value" id="saisie_nom_civil" contenteditable="true"></div></div>
+                                <div class="saisie-field-row"><div class="saisie-field-label">SEXE :</div> <div class="editable-zone no-underline short-text saisie-field-value" id="saisie_sexe" contenteditable="true"></div></div>
+                                <div class="saisie-field-row"><div class="saisie-field-label">ETHNIE :</div> <div class="editable-zone no-underline short-text saisie-field-value" id="saisie_ethnie" contenteditable="true"></div></div>
+                                <div class="saisie-field-row"><div class="saisie-field-label">DATE DE NAISSANCE :</div> <div class="editable-zone no-underline short-text saisie-field-value" id="saisie_dob" contenteditable="true"></div></div>
+                                <div class="saisie-field-row"><div class="saisie-field-label">ADRESSE :</div> <div class="editable-zone no-underline short-text saisie-field-value" id="saisie_adresse" contenteditable="true"></div></div>
+                                <div class="saisie-field-row"><div class="saisie-field-label">N° TÉLÉPHONE :</div> <div class="editable-zone no-underline short-text saisie-field-value" id="saisie_tel" contenteditable="true"></div></div>
+                                <div class="saisie-field-row"><div class="saisie-field-label">EMAIL (DISCORD) :</div> <div class="editable-zone no-underline short-text saisie-field-value" id="saisie_email" contenteditable="true"></div></div>
+                            </div>
+                            <div style="width: 150px;">
+                                <div id="saisie_photo_profil" class="paste-zone" tabindex="0" style="width: 150px; height: 150px; border: 2px dashed #999; display: flex; align-items: center; justify-content: center; text-align: center; color: #777; background: #fff; overflow: hidden; font-size: 0.8em; padding: 5px;">PHOTO<br>PROFIL<br><br><span style="font-size:0.8em">(Focus + Ctrl V)</span></div>
+                            </div>
                         </div>
                     </div>
 
-                    <p><strong>CARTE D'IDENTITÉ :</strong></p>
-                    <div id="saisie_photo_id" class="paste-zone" tabindex="0" style="width: 100%; height: 220px; border: 2px dashed #999; display: flex; align-items: center; justify-content: center; text-align: center; color: #777; background: #fff; overflow: hidden; font-size: 0.9em; margin-bottom: 20px;">PHOTO CARTE D'IDENTITÉ <br> (Sélectionnez le cadre et faites Ctrl+V)</div>
+                    <div style="line-height: 1.8; font-size: 0.95em; margin-bottom: 20px;">
+                        <div class="saisie-field-row"><div class="saisie-field-label">OCCUPATION :</div> <div class="editable-zone no-underline short-text saisie-field-value" id="saisie_occu" contenteditable="true"></div></div>
+                        <div class="saisie-field-row"><div class="saisie-field-label">PERMIS POSSÉDÉS :</div> <div class="editable-zone no-underline short-text saisie-field-value" id="saisie_permis" contenteditable="true">Aucun</div></div>
+                    </div>
+
+                    <p><strong>PIÈCES D'IDENTITÉ :</strong></p>
+                    <div id="saisie_photo_id" class="paste-zone" tabindex="0" style="width: 100%; height: 120px; border: 2px dashed #999; display: flex; align-items: center; justify-content: center; text-align: center; color: #777; background: #fff; overflow: hidden; font-size: 0.9em; margin-bottom: 20px;">PHOTO CARTE D'IDENTITÉ <br> (Sélectionnez le cadre et faites Ctrl+V)</div>
+                    <div class="saisie-field-row"><div class="saisie-field-label">AFFILIATION CRIMINELLE :</div> <div class="editable-zone no-underline short-text saisie-field-value" id="saisie_aff" contenteditable="true">Aucune / Inconnue</div></div>
 
                     <p><strong>CASIER JUDICIAIRE :</strong></p>
-                    <div id="saisie_casier" class="editable-zone" contenteditable="true" style="width:100%; min-height:60px; display:block;">Vierge.</div>
+                    <div id="saisie_casier" class="editable-zone" contenteditable="true" style="width:100%; min-height:40px; display:block;">"DOSSIER(s): Nº ";</div>
                     
-                    <p><strong>DOSSIERS APPARUS (Rapports associés) :</strong></p>
-                    <div id="saisie_dossiers" class="editable-zone" contenteditable="true" style="width:100%; min-height:60px; display:block;">N/A</div>
+                    <div id="a4_saisie_infractions_section">
+                        <p><strong>DÉLITS / INFRACTIONS (les plus importants) :</strong></p>
+                        <table><tbody id="paper_saisie_infractions"></tbody></table>
+                    </div>
 
-                    <p><strong>VÉHICULES POSSÉDÉS :</strong></p>
-                    <div id="saisie_vehicules_list" style="display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;"></div>
+                    <p><strong>OBJETS : (Véhicules, Propriétés, Armes)</strong></p>
+                    <div id="saisie_objets_list" style="display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;"></div>
 
                     <p><strong>OBSERVATIONS :</strong></p>
                     <div id="saisie_observations" class="editable-zone" contenteditable="true" style="width:100%; min-height:60px; display:block; margin-bottom: 20px;">N/A</div>
@@ -488,32 +553,32 @@
             INCIDENT: {
                 title: "RAPPORT D'INCIDENT", labelDoc: "RAPPORT N°", labelSuspect: "CIVIL(S) IMPLIQUÉ(S) :", labelBtnSuspect: "+ Civil",
                 showAgents: true, showVictimes: false, showTemoins: false, showInfractions: false, showTotals: false, showObs: false,
-                clearDocId: false, isSaisie: false, isInvestigation: false
+                clearDocId: false, isSaisie: false, isInvestigation: false, showVraisSuspects: true, showPhotoProfil: false
             },
             INTERVENTION: {
                 title: "RAPPORT D'INTERVENTION", labelDoc: "RAPPORT N°", labelSuspect: "CIVIL(S) IMPLIQUÉ(S) :", labelBtnSuspect: "+ Civil",
                 showAgents: true, showVictimes: false, showTemoins: false, showInfractions: false, showTotals: false, showObs: false,
-                clearDocId: false, isSaisie: false, isInvestigation: false
+                clearDocId: false, isSaisie: false, isInvestigation: false, showVraisSuspects: true, showPhotoProfil: false
             },
             ARRESTATION: {
                 title: "RAPPORT D'ARRESTATION", labelDoc: "DOSSIER N°", labelSuspect: "SUSPECT(S) IMPLIQUÉ(S) :", labelBtnSuspect: "+ Suspect",
                 showAgents: true, showVictimes: true, showTemoins: true, showInfractions: true, showTotals: true, showObs: true,
-                clearDocId: false, labelInfractions: "CHEF(S) D'INCULPATION :", isSaisie: false, isInvestigation: false
+                clearDocId: false, labelInfractions: "CHEF(S) D'INCULPATION :", isSaisie: false, isInvestigation: false, showVraisSuspects: false, showPhotoProfil: true
             },
             PLAINTE: {
                 title: "PLAINTE DÉPOSÉE", labelDoc: "DOSSIER N°", labelSuspect: "ACCUSÉ(ES) :", labelBtnSuspect: "+ Accusé(es)",
                 showAgents: false, showVictimes: true, showTemoins: true, showInfractions: true, showTotals: false, showObs: true,
-                clearDocId: true, labelInfractions: "MOTIF(S) :", isSaisie: false, isInvestigation: false
+                clearDocId: true, labelInfractions: "MOTIF(S) :", isSaisie: false, isInvestigation: false, showVraisSuspects: false, showPhotoProfil: false
             },
             INVESTIGATION: {
                 title: "RAPPORT D'INVESTIGATION", labelDoc: "", labelSuspect: "SUJET(S) / PERSONNES LIÉES :", labelBtnSuspect: "+ Sujet",
                 showAgents: true, showVictimes: false, showTemoins: true, showInfractions: false, showTotals: false, showObs: true,
-                clearDocId: true, isSaisie: false, isInvestigation: true
+                clearDocId: true, isSaisie: false, isInvestigation: true, showVraisSuspects: false, showPhotoProfil: false
             },
             SAISIE: {
                 title: "FICHE D'IDENTIFICATION CIVIL", labelDoc: "", labelSuspect: "", labelBtnSuspect: "",
-                showAgents: false, showVictimes: false, showTemoins: false, showInfractions: false, showTotals: false, showObs: false,
-                clearDocId: true, isSaisie: true, isInvestigation: false
+                showAgents: false, showVictimes: false, showTemoins: false, showInfractions: true, showTotals: false, showObs: false,
+                clearDocId: true, isSaisie: true, isInvestigation: false, showVraisSuspects: false, showPhotoProfil: false
             }
         };
 
@@ -541,13 +606,84 @@
             
             document.getElementById('doc_id').addEventListener('input', updateTabTitle);
             
-            clearAllData(); // Remplit la date auto et prépare le DOM initial
-            switchReportType('INCIDENT'); // Switch et sauvegarde le DOM dans la mémoire d'INCIDENT
+                    // --- FORCE LE FORMAT TÉLÉPHONE (000) 000-0000 EN TEMPS RÉEL ---
+            const telInput = document.getElementById('saisie_tel');
+            if(telInput) {
+                telInput.addEventListener('input', function() {
+                    let cursor = window.getSelection().getRangeAt(0).startOffset;
+                    let raw = this.innerText.replace(/\D/g, '').slice(0, 10);
+                    let formatted = "";
+                    if (raw.length > 0) {
+                        formatted = "(" + raw.substring(0, 3);
+                        if (raw.length > 3) formatted += ") " + raw.substring(3, 6);
+                        if (raw.length > 6) formatted += "-" + raw.substring(6, 10);
+                    }
+                    this.innerText = formatted;
+                    // Repositionne le curseur à la fin pour ne pas bloquer la saisie
+                    let range = document.createRange();
+                    let sel = window.getSelection();
+                    range.selectNodeContents(this);
+                    range.collapse(false);
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                });
+
+                // COPIE PROPRE (CHIFRES UNIQUEMENT)
+                telInput.addEventListener('copy', function(e) {
+                    const raw = this.innerText.replace(/\D/g, '');
+                    e.clipboardData.setData('text/plain', raw);
+                    e.preventDefault();
+                });
+            }
+
+            // --- FORCE LE FORMAT DATE JJ/MM/AAAA EN TEMPS RÉEL ET VISUELLEMENT ---
+            const dobInput = document.getElementById('saisie_dob');
+            if(dobInput) {
+                dobInput.addEventListener('focus', function() { 
+                    if(this.innerText === 'JJ/MM/AAAA') this.innerText = '';
+                    this.innerText = this.innerText.replace(/\D/g, ''); 
+                });
+                dobInput.addEventListener('blur', function() {
+                    let val = this.innerText.replace(/\D/g, '');
+                    if(val.length >= 8) { this.innerText = `${val.substring(0,2)}/${val.substring(2,4)}/${val.substring(4,8)}`; }
+                    else if (val.length === 0) { this.innerText = 'JJ/MM/AAAA'; } // Remet le placeholder visuel si vide
+                    else if (val.length > 0) { this.innerText = val; }
+                });
+                dobInput.addEventListener('input', function() {
+                    let raw = this.innerText.replace(/\D/g, '').slice(0, 8);
+                    let formatted = "";
+                    if (raw.length > 0) {
+                        formatted = raw.substring(0, 2);
+                        if (raw.length > 2) formatted += "/" + raw.substring(2, 4);
+                        if (raw.length > 4) formatted += "/" + raw.substring(4, 8);
+                    }
+                    this.innerText = formatted;
+                    let range = document.createRange();
+                    let sel = window.getSelection();
+                    range.selectNodeContents(this);
+                    range.collapse(false);
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                });
+            }
+
+            clearAllData(); 
+            switchReportType('INCIDENT'); 
 
             setTimeout(() => {
                 document.getElementById('loader').classList.add('hidden');
             }, 600); 
         };
+
+        // --- EMPÊCHER LE SAUT DE LIGNE (ENTER) DANS LES CHAMPS COURTS ---
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                if (e.target.classList.contains('short-text') || e.target.closest('.short-text')) {
+                    e.preventDefault();
+                    e.target.blur();
+                }
+            }
+        });
 
         // --- GESTION DE L'ISOLATION DES ONGLETS (SAUVEGARDE & RESTAURATION) ---
         function saveCurrentState() {
@@ -556,8 +692,10 @@
                 agents: document.getElementById('paper_agents').innerHTML,
                 victimes: document.getElementById('paper_victimes').innerHTML,
                 suspects: document.getElementById('paper_suspects').innerHTML,
+                vrais_suspects: document.getElementById('paper_vrais_suspects').innerHTML,
                 temoins: document.getElementById('paper_temoins').innerHTML,
                 infractions: document.getElementById('paper_infractions').innerHTML,
+                saisie_infractions: document.getElementById('paper_saisie_infractions').innerHTML,
                 gallery: document.getElementById('evidence_gallery').innerHTML,
                 recit: document.getElementById('a4_recit').innerHTML,
                 obs: document.getElementById('a4_obs_text').innerHTML,
@@ -567,20 +705,22 @@
                 doc_id: document.getElementById('doc_id').innerText,
                 
                 saisie_nom: document.getElementById('saisie_nom_civil').innerHTML,
+                saisie_sexe: document.getElementById('saisie_sexe').innerHTML,
+                saisie_ethnie: document.getElementById('saisie_ethnie').innerHTML,
                 saisie_dob: document.getElementById('saisie_dob').innerHTML,
+                saisie_adresse: document.getElementById('saisie_adresse').innerHTML,
                 saisie_tel: document.getElementById('saisie_tel').innerHTML,
                 saisie_email: document.getElementById('saisie_email').innerHTML,
-                saisie_taille: document.getElementById('saisie_taille').innerHTML,
                 saisie_occu: document.getElementById('saisie_occu').innerHTML,
                 saisie_permis: document.getElementById('saisie_permis').innerHTML,
                 saisie_aff: document.getElementById('saisie_aff').innerHTML,
                 saisie_casier: document.getElementById('saisie_casier').innerHTML,
-                saisie_dossiers: document.getElementById('saisie_dossiers').innerHTML,
                 saisie_photo_profil: document.getElementById('saisie_photo_profil').innerHTML,
                 saisie_photo_id: document.getElementById('saisie_photo_id').innerHTML,
-                saisie_vehicules_list: document.getElementById('saisie_vehicules_list').innerHTML,
+                saisie_objets_list: document.getElementById('saisie_objets_list').innerHTML,
                 saisie_observations: document.getElementById('saisie_observations').innerHTML,
 
+                arrest_photo: document.getElementById('arrestation_photo_profil').innerHTML,
                 inves_target: document.getElementById('a4_inves_target').innerHTML
             };
         }
@@ -590,8 +730,10 @@
             document.getElementById('paper_agents').innerHTML = d.agents || "";
             document.getElementById('paper_victimes').innerHTML = d.victimes || "";
             document.getElementById('paper_suspects').innerHTML = d.suspects || "";
+            document.getElementById('paper_vrais_suspects').innerHTML = d.vrais_suspects || "";
             document.getElementById('paper_temoins').innerHTML = d.temoins || "";
             document.getElementById('paper_infractions').innerHTML = d.infractions || "";
+            document.getElementById('paper_saisie_infractions').innerHTML = d.saisie_infractions || "";
             document.getElementById('evidence_gallery').innerHTML = d.gallery || "";
             document.getElementById('a4_recit').innerHTML = d.recit || "";
             document.getElementById('a4_obs_text').innerHTML = d.obs || "";
@@ -605,52 +747,47 @@
             document.getElementById('doc_id').innerText = d.doc_id || "";
             
             document.getElementById('saisie_nom_civil').innerHTML = d.saisie_nom || "";
+            document.getElementById('saisie_sexe').innerHTML = d.saisie_sexe || "";
+            document.getElementById('saisie_ethnie').innerHTML = d.saisie_ethnie || "";
             document.getElementById('saisie_dob').innerHTML = d.saisie_dob || "";
+            document.getElementById('saisie_adresse').innerHTML = d.saisie_adresse || "";
             document.getElementById('saisie_tel').innerHTML = d.saisie_tel || "";
             document.getElementById('saisie_email').innerHTML = d.saisie_email || "";
-            document.getElementById('saisie_taille').innerHTML = d.saisie_taille || "";
             document.getElementById('saisie_occu').innerHTML = d.saisie_occu || "";
             document.getElementById('saisie_permis').innerHTML = d.saisie_permis || "";
             document.getElementById('saisie_aff').innerHTML = d.saisie_aff || "";
             document.getElementById('saisie_casier').innerHTML = d.saisie_casier || "";
-            document.getElementById('saisie_dossiers').innerHTML = d.saisie_dossiers || "";
-            document.getElementById('saisie_photo_profil').innerHTML = d.saisie_photo_profil || "";
-            document.getElementById('saisie_photo_id').innerHTML = d.saisie_photo_id || "";
-            document.getElementById('saisie_vehicules_list').innerHTML = d.saisie_vehicules_list || "";
-            document.getElementById('saisie_observations').innerHTML = d.saisie_observations || "";
+            document.getElementById('saisie_photo_profil').innerHTML = d.saisie_photo_profil || "PHOTO<br>PROFIL<br><br><span style=\"font-size:0.8em\"></span>";
+            document.getElementById('saisie_photo_id').innerHTML = d.saisie_photo_id || "PHOTO PIECES D'IDENTITÉ";
+            document.getElementById('saisie_objets_list').innerHTML = d.saisie_objets_list || "";
+            document.getElementById('saisie_observations').innerHTML = d.saisie_observations || "Signes distinctifs (Tatouages...) : <br>Patrons d'habits aperçus :";
 
+            document.getElementById('arrestation_photo_profil').innerHTML = d.arrest_photo || "PHOTO<br>PROFIL<br><br><span style=\"font-size:0.8em\"></span>";
             document.getElementById('a4_inves_target').innerHTML = d.inves_target || "";
         }
 
         function switchReportType(type) {
-            // On sauvegarde l'état de l'onglet qu'on s'apprête à quitter
-            if (currentType) {
-                saveCurrentState();
-            }
+            if (currentType) saveCurrentState();
 
             currentType = type;
             const conf = CONFIG[type];
 
-            // Changement visuel des boutons
             document.querySelectorAll('.tabs button').forEach(btn => btn.classList.remove('active'));
             document.getElementById(`tab_${type}`).classList.add('active');
 
-            // --- Logique d'Isolation ---
             if (stateData[type]) {
                 restoreState(type);
             } else {
                 clearAllData(); 
                 if (conf.clearDocId) document.getElementById('doc_id').innerText = "";
                 
-                // Suppression Auto-complétion Observation pour PLAINTE et INVESTIGATION
-                if (type === 'PLAINTE' || type === 'INVESTIGATION') {
+                if (type === 'PLAINTE' || type === 'INVESTIGATION' || type === 'SAISIE') {
                     document.getElementById('a4_obs_text').innerHTML = "<br>";
                 } else {
                     document.getElementById('a4_obs_text').innerHTML = "Amende appliquée et réglée le ***.";
                 }
             }
 
-            // Affichage Labels & Visibilité
             document.getElementById('ui_panel_title').innerText = `Dossier - ${type.charAt(0) + type.slice(1).toLowerCase()}`;
             document.getElementById('doc_main_title').innerText = conf.title;
             updateTabTitle();
@@ -675,11 +812,13 @@
                 document.getElementById('ctrl_saisie').classList.remove('d-none');
                 document.getElementById('page2').classList.add('d-none');
                 document.getElementById('a4_saisie_body').classList.add('console-mechanic');
+                document.getElementById('sec_preuves_standard').classList.add('d-none');
             } else {
                 document.getElementById('ctrl_standard').classList.remove('d-none');
                 document.getElementById('ctrl_saisie').classList.add('d-none');
                 document.getElementById('page2').classList.remove('d-none');
                 document.getElementById('a4_saisie_body').classList.remove('console-mechanic');
+                document.getElementById('sec_preuves_standard').classList.remove('d-none');
             }
 
             if (conf.isInvestigation) {
@@ -701,15 +840,16 @@
             document.getElementById('btn_add_temoin').disabled = !conf.showTemoins || isSaisie;
             document.getElementById('btn_man_temoin').disabled = !conf.showTemoins || isSaisie;
 
-            document.getElementById('btn_add_infraction').disabled = !conf.showInfractions || isSaisie;
-            document.getElementById('btn_man_infraction').disabled = !conf.showInfractions || isSaisie;
-            document.getElementById('sel_infraction').disabled = !conf.showInfractions || isSaisie;
-            document.getElementById('manual_inf_nom').disabled = !conf.showInfractions || isSaisie;
-            document.getElementById('manual_inf_prix').disabled = !conf.showInfractions || isSaisie;
-            document.getElementById('manual_inf_peine').disabled = !conf.showInfractions || isSaisie;
+            // En Saisie, les infractions sont actives !
+            const showInfr = conf.showInfractions;
+            setSectionDisabled('sec_infractions', !showInfr);
+            setSectionDisabled('sec_manual_infraction', !showInfr);
 
             document.getElementById('btn_add_suspect').disabled = isSaisie;
             document.getElementById('btn_man_suspect').disabled = isSaisie;
+            document.getElementById('btn_add_vrai_suspect').disabled = !conf.showVraisSuspects || isSaisie;
+            document.getElementById('btn_man_vrai_suspect').disabled = !conf.showVraisSuspects || isSaisie;
+            
             document.getElementById('sel_civil').disabled = isSaisie;
             document.getElementById('manual_name').disabled = isSaisie;
 
@@ -721,13 +861,12 @@
                 document.getElementById('a4_saisie_body').classList.add('d-none');
                 
                 setSectionDisabled('sec_agents', !conf.showAgents);
-                setSectionDisabled('sec_infractions', !conf.showInfractions);
-                setSectionDisabled('sec_manual_infraction', !conf.showInfractions);
                 
                 toggleElementA4('a4_agents', conf.showAgents);
                 toggleElementA4('a4_infractions', conf.showInfractions);
                 toggleElementA4('a4_totals', conf.showTotals);
                 toggleElementA4('a4_observations', conf.showObs);
+                toggleElementA4('a4_arrestation_photo_container', conf.showPhotoProfil);
                 updateA4Visibility();
             }
         }
@@ -736,14 +875,15 @@
             document.getElementById('paper_agents').innerHTML = '';
             document.getElementById('paper_victimes').innerHTML = '';
             document.getElementById('paper_suspects').innerHTML = '';
+            document.getElementById('paper_vrais_suspects').innerHTML = '';
             document.getElementById('paper_temoins').innerHTML = '';
             document.getElementById('paper_infractions').innerHTML = '';
+            document.getElementById('paper_saisie_infractions').innerHTML = '';
             document.getElementById('evidence_gallery').innerHTML = '';
             document.getElementById('sel_civil').value = '';
             document.getElementById('sel_agent').value = '';
             document.getElementById('sel_infraction').value = '';
             
-            // Date Automatique
             const now = new Date();
             const d = String(now.getDate()).padStart(2, '0');
             const m = String(now.getMonth() + 1).padStart(2, '0');
@@ -757,44 +897,52 @@
             
             document.getElementById('a4_signature').innerHTML = "";
             document.getElementById('saisie_nom_civil').innerHTML = "";
+            document.getElementById('saisie_sexe').innerHTML = "";
+            document.getElementById('saisie_ethnie').innerHTML = "";
+            document.getElementById('saisie_adresse').innerHTML = "";
             document.getElementById('saisie_dob').innerHTML = "";
             document.getElementById('saisie_tel').innerHTML = "";
             document.getElementById('saisie_email').innerHTML = "";
-            document.getElementById('saisie_taille').innerHTML = "";
-            document.getElementById('saisie_occu').innerHTML = "";
+            document.getElementById('saisie_occu').innerHTML = "Aucune";
             document.getElementById('saisie_permis').innerHTML = "Aucun";
             document.getElementById('saisie_aff').innerHTML = "Aucune / Inconnue";
             document.getElementById('saisie_casier').innerHTML = "Vierge.";
-            document.getElementById('saisie_dossiers').innerHTML = "N/A";
             
-            document.getElementById('saisie_photo_profil').innerHTML = "PHOTO<br>PROFIL<br><br><span style=\"font-size:0.8em\">(Focus + Ctrl V)</span>";
+            const defPhoto = "PHOTO<br>PROFIL<br><br><span style=\"font-size:0.8em\">(Focus + Ctrl V)</span>";
+            document.getElementById('saisie_photo_profil').innerHTML = defPhoto;
+            document.getElementById('arrestation_photo_profil').innerHTML = defPhoto;
             document.getElementById('saisie_photo_id').innerHTML = "PHOTO CARTE D'IDENTITÉ <br> (Sélectionnez le cadre et faites Ctrl+V)";
-            document.getElementById('saisie_vehicules_list').innerHTML = "";
+            document.getElementById('saisie_objets_list').innerHTML = "";
             document.getElementById('saisie_observations').innerHTML = "N/A";
             
             currentAmende = 0; currentPeine = 0; updateTotals();
         }
 
-        // AJOUTER UN VÉHICULE (FICHE DE SAISIE)
-        function addSaisieVehicle() {
-            const model = document.getElementById('saisie_veh_model').value || "Modèle...";
-            const plate = document.getElementById('saisie_veh_plate').value || "Plaque...";
+        // AJOUTER UN OBJET (FICHE DE SAISIE)
+        function addSaisieObject() {
+            const type = document.getElementById('saisie_obj_type').value;
+            const nom = document.getElementById('saisie_obj_nom').value || "Nom...";
+            const desc = document.getElementById('saisie_obj_desc').value || "Détails...";
+            const ident = document.getElementById('saisie_obj_id').value || "Info...";
             
-            const list = document.getElementById('saisie_vehicules_list');
+            const list = document.getElementById('saisie_objets_list');
             const div = document.createElement('div');
-            div.style.cssText = "border: 1px dashed #999; padding: 5px; width: 150px; text-align: center; position: relative; background: #fff;";
+            div.className = "saisie-obj-card";
             div.innerHTML = `
-                <div class="paste-zone" tabindex="0" style="width:100%; height:90px; display:flex; align-items:center; justify-content:center; background:#f5f5f5; overflow:hidden; margin-bottom:5px; border: 1px solid #ddd;">
-                    <span style="font-size:0.8em; color:#aaa;">Photo<br>(Focus + Ctrl V)</span>
+                <div class="paste-zone" tabindex="0" style="width:100%; height:90px; display:flex; align-items:center; justify-content:center; background:#f0f2f5; overflow:hidden; border-radius: 4px; border: 1px dashed #a0aec0;">
+                    <span style="font-size:0.8em; color:#718096;">Photo<br>(Focus + Ctrl V)</span>
                 </div>
-                <span class="remove-btn" style="position:absolute; top:2px; right:2px; background:white; border-radius:50%; padding:0 5px; cursor:pointer;" onclick="this.parentElement.remove();">✘</span>
-                <div class="editable-zone no-underline" contenteditable="true" style="font-size:0.85em; font-weight:bold; display:block;">${model}</div>
-                <div class="editable-zone no-underline" contenteditable="true" style="font-size:0.8em; display:block;">${plate}</div>
+                <span class="remove-btn" style="position:absolute; top:-8px; right:-8px; background:#fff; border: 1px solid #e74c3c; border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:12px; margin:0;" onclick="this.parentElement.remove();">✘</span>
+                <div class="editable-zone no-underline short-text" contenteditable="true" style="font-size:0.85em; font-weight:bold; display:block; color:var(--blue-police); border-bottom: 1px solid #edf2f7 !important; padding-bottom:3px;">${type}</div>
+                <div class="editable-zone no-underline short-text" contenteditable="true" style="font-size:0.85em; font-weight:bold; display:block;">${nom}</div>
+                <div class="editable-zone no-underline short-text" contenteditable="true" style="font-size:0.8em; display:block; color:#4a5568;">${desc}</div>
+                <div class="editable-zone no-underline short-text" contenteditable="true" style="font-size:0.8em; display:block; color:#718096; font-style: italic;">${ident}</div>
             `;
             list.appendChild(div);
             
-            document.getElementById('saisie_veh_model').value = '';
-            document.getElementById('saisie_veh_plate').value = '';
+            document.getElementById('saisie_obj_nom').value = '';
+            document.getElementById('saisie_obj_desc').value = '';
+            document.getElementById('saisie_obj_id').value = '';
         }
 
         // GESTION DU COLLAGE D'IMAGES (Ctrl+V) UNIVERSEL
@@ -812,14 +960,13 @@
                 const reader = new FileReader();
                 reader.onload = (event) => {
                     const active = document.activeElement;
-                    // Si l'utilisateur a cliqué sur n'importe quelle "paste-zone" (Profil, ID, Véhicule)
                     if (active && active.classList.contains('paste-zone')) {
-                        active.innerHTML = `<img src="${event.target.result}" style="width:100%; height:100%; object-fit:contain; background:#fff;">`;
+                        // Empêche l'étirement des photos de carte en gardant auto et max-width
+                        active.innerHTML = `<img src="${event.target.result}" style="max-width:100%; max-height:100%; width:auto; height:auto; margin:auto; display:block; background:#fff;">`;
                     } else {
-                        // Sinon, c'est une preuve photo classique pour la page 2
                         const div = document.createElement('div');
                         div.className = "evidence-item";
-                        div.innerHTML = `<img src="${event.target.result}"><span class="remove-btn" style="position:absolute; top:5px; right:5px; background:white; border-radius:50%; padding:0 5px;" onclick="this.parentElement.remove();">✘</span><div class="editable-zone no-underline" contenteditable="true" style="display:block; text-align:center; font-size:0.8em;">Description...</div>`;
+                        div.innerHTML = `<img src="${event.target.result}" style="max-width:100%; max-height:100%; width:auto; height:auto; margin:auto; display:block;"><span class="remove-btn" style="position:absolute; top:5px; right:5px; background:white; border-radius:50%; padding:0 5px;" onclick="this.parentElement.remove();">✘</span><div class="editable-zone no-underline" contenteditable="true" style="display:block; text-align:center; font-size:0.8em;">Description...</div>`;
                         document.getElementById('evidence_gallery').appendChild(div);
                     }
                 };
@@ -839,9 +986,12 @@
                     html_agents: document.getElementById('paper_agents').innerHTML,
                     html_victimes: document.getElementById('paper_victimes').innerHTML,
                     html_suspects: document.getElementById('paper_suspects').innerHTML,
+                    html_vrais_suspects: document.getElementById('paper_vrais_suspects').innerHTML,
                     html_temoins: document.getElementById('paper_temoins').innerHTML,
                     html_infractions: document.getElementById('paper_infractions').innerHTML,
+                    html_saisie_infractions: document.getElementById('paper_saisie_infractions').innerHTML,
                     html_evidence: document.getElementById('evidence_gallery').innerHTML,
+                    html_arrest_photo: document.getElementById('arrestation_photo_profil').innerHTML,
                     zones: {}
                 };
                 document.querySelectorAll('.editable-zone').forEach((el, index) => {
@@ -852,9 +1002,12 @@
                     data.saisie_profil = document.getElementById('saisie_photo_profil').innerHTML;
                     data.saisie_id = document.getElementById('saisie_photo_id').innerHTML;
                     data.saisie_dob = document.getElementById('saisie_dob').innerHTML;
+                    data.saisie_adresse = document.getElementById('saisie_adresse').innerHTML;
+                    data.saisie_sexe = document.getElementById('saisie_sexe').innerHTML;
+                    data.saisie_ethnie = document.getElementById('saisie_ethnie').innerHTML;
                     data.saisie_tel = document.getElementById('saisie_tel').innerHTML;
                     data.saisie_email = document.getElementById('saisie_email').innerHTML;
-                    data.saisie_vehicules = document.getElementById('saisie_vehicules_list').innerHTML;
+                    data.saisie_objets = document.getElementById('saisie_objets_list').innerHTML;
                     data.saisie_obs = document.getElementById('saisie_observations').innerHTML;
                 }
                 
@@ -872,12 +1025,15 @@
                         const data = JSON.parse(decodeURIComponent(atob(code)));
                         switchReportType(data.type);
                         
-                        document.getElementById('paper_agents').innerHTML = data.html_agents;
-                        document.getElementById('paper_victimes').innerHTML = data.html_victimes;
-                        document.getElementById('paper_suspects').innerHTML = data.html_suspects;
-                        document.getElementById('paper_temoins').innerHTML = data.html_temoins;
-                        document.getElementById('paper_infractions').innerHTML = data.html_infractions;
-                        document.getElementById('evidence_gallery').innerHTML = data.html_evidence;
+                        document.getElementById('paper_agents').innerHTML = data.html_agents || "";
+                        document.getElementById('paper_victimes').innerHTML = data.html_victimes || "";
+                        document.getElementById('paper_suspects').innerHTML = data.html_suspects || "";
+                        document.getElementById('paper_vrais_suspects').innerHTML = data.html_vrais_suspects || "";
+                        document.getElementById('paper_temoins').innerHTML = data.html_temoins || "";
+                        document.getElementById('paper_infractions').innerHTML = data.html_infractions || "";
+                        document.getElementById('paper_saisie_infractions').innerHTML = data.html_saisie_infractions || "";
+                        document.getElementById('evidence_gallery').innerHTML = data.html_evidence || "";
+                        document.getElementById('arrestation_photo_profil').innerHTML = data.html_arrest_photo || "PHOTO<br>PROFIL<br><br><span style=\"font-size:0.8em\">(Focus + Ctrl V)</span>";
                         
                         document.querySelectorAll('.editable-zone').forEach((el, index) => {
                             if(data.zones[index] !== undefined) el.innerHTML = data.zones[index];
@@ -886,15 +1042,18 @@
                         if(data.saisie_profil) document.getElementById('saisie_photo_profil').innerHTML = data.saisie_profil;
                         if(data.saisie_id) document.getElementById('saisie_photo_id').innerHTML = data.saisie_id;
                         if(data.saisie_dob !== undefined) document.getElementById('saisie_dob').innerHTML = data.saisie_dob;
+                        if(data.saisie_adresse !== undefined) document.getElementById('saisie_adresse').innerHTML = data.saisie_adresse;
+                        if(data.saisie_sexe !== undefined) document.getElementById('saisie_sexe').innerHTML = data.saisie_sexe;
+                        if(data.saisie_ethnie !== undefined) document.getElementById('saisie_ethnie').innerHTML = data.saisie_ethnie;
                         if(data.saisie_tel !== undefined) document.getElementById('saisie_tel').innerHTML = data.saisie_tel;
                         if(data.saisie_email !== undefined) document.getElementById('saisie_email').innerHTML = data.saisie_email;
-                        if(data.saisie_vehicules !== undefined) document.getElementById('saisie_vehicules_list').innerHTML = data.saisie_vehicules;
+                        if(data.saisie_objets !== undefined) document.getElementById('saisie_objets_list').innerHTML = data.saisie_objets;
                         if(data.saisie_obs !== undefined) document.getElementById('saisie_observations').innerHTML = data.saisie_obs;
                         
                         currentAmende = parseInt(document.getElementById('total_amende').innerText.replace(/\D/g,'')) || 0;
                         currentPeine = parseInt(document.getElementById('total_peine').innerText) || 0;
                         
-                        saveCurrentState(); // Enregistre les données fraichement importées dans la mémoire de l'onglet
+                        saveCurrentState(); 
                         updateA4Visibility();
                         alert("✅ Données importées avec succès !");
                     } catch(e) {
@@ -909,12 +1068,11 @@
             if (CONFIG[currentType].labelDoc === "") {
                 document.title = `${CONFIG[currentType].title}`;
             } else {
-                document.title = `${CONFIG[currentType].title} - ${docId || "000"}`;
+                document.title = `${CONFIG[currentType].title}${docId ? ' - ' + docId : ''}`;
             }
         }
 
         function openBlankTab() {
-            // Utilise l'URL exacte du navigateur pour éviter les cassures de style sur PC local
             window.open(window.location.href.split('#')[0], '_blank');
         }
 
@@ -923,7 +1081,7 @@
                 clearAllData();
                 const conf = CONFIG[currentType];
                 if (conf.clearDocId) document.getElementById('doc_id').innerText = "";
-                saveCurrentState(); // Écrase la sauvegarde avec le document vide
+                saveCurrentState(); 
                 updateA4Visibility();
                 updateTabTitle();
             }
@@ -957,9 +1115,11 @@
             const vCount = document.getElementById('paper_victimes').children.length;
             const tCount = document.getElementById('paper_temoins').children.length;
             const sCount = document.getElementById('paper_suspects').children.length;
+            const vsCount = document.getElementById('paper_vrais_suspects').children.length;
 
             toggleElementA4('a4_victimes', conf.showVictimes && vCount > 0);
             toggleElementA4('a4_suspects', sCount > 0 || !conf.isInvestigation); 
+            toggleElementA4('a4_vrais_suspects', conf.showVraisSuspects && vsCount > 0);
             toggleElementA4('a4_temoins', conf.showTemoins && tCount > 0);
         }
 
@@ -968,10 +1128,11 @@
             const valAgent = document.getElementById('sel_agent').value;
             const valInfr = document.getElementById('sel_infraction').value;
 
-            if (['victime', 'suspect', 'temoin'].includes(type)) {
+            if (['victime', 'suspect', 'vrai_suspect', 'temoin'].includes(type)) {
                 if (!valCivil) return alert("Sélectionnez/Tapez un civil.");
                 if (type === 'victime') appendVictime(valCivil);
                 if (type === 'suspect') appendSuspect(valCivil);
+                if (type === 'vrai_suspect') appendVraiSuspect(valCivil);
                 if (type === 'temoin') appendTemoin(valCivil);
                 document.getElementById('sel_civil').value = '';
             } 
@@ -982,7 +1143,7 @@
             } 
             else if (type === 'infraction') {
                 if (!valInfr) return alert("Tapez/Sélectionnez un délit.");
-                const data = RP_DATA.infractions.find(i => i.nom === valInfr);
+                const data = RP_DATA && RP_DATA.infractions ? RP_DATA.infractions.find(i => i.nom === valInfr) : null;
                 if(data) appendInfraction(data.nom, data.amende || 0, data.peine || 0);
                 else appendInfraction(valInfr, 0, 0); 
                 document.getElementById('sel_infraction').value = '';
@@ -995,6 +1156,7 @@
 
             if (type === 'victime') appendVictime(name);
             else if (type === 'suspect') appendSuspect(name);
+            else if (type === 'vrai_suspect') appendVraiSuspect(name);
             else if (type === 'temoin') appendTemoin(name);
             else if (type === 'agent') appendAgent(name);
             else if (type === 'infraction') {
@@ -1012,7 +1174,7 @@
 
         function createLi(name, callbackStr) {
             const li = document.createElement('li');
-            li.innerHTML = `<span class="editable-zone no-underline" contenteditable="true">${name}</span> <span class="remove-btn" onclick="this.parentElement.remove(); ${callbackStr}">✘</span>`;
+            li.innerHTML = `<span class="editable-zone no-underline short-text" contenteditable="true">${name}</span> <span class="remove-btn" onclick="this.parentElement.remove(); ${callbackStr}">✘</span>`;
             return li;
         }
 
@@ -1020,29 +1182,43 @@
         function appendTemoin(name) { document.getElementById('paper_temoins').appendChild(createLi(name, 'updateA4Visibility()')); updateA4Visibility(); }
         function appendAgent(name) { document.getElementById('paper_agents').appendChild(createLi(name, '')); }
 
+        function appendVraiSuspect(name) { 
+            const li = createLi(name, 'updateSuspectNumbers(); updateA4Visibility()');
+            li.innerHTML = `<strong></strong> ` + li.innerHTML;
+            document.getElementById('paper_vrais_suspects').appendChild(li); 
+            updateSuspectNumbers();
+            updateA4Visibility(); 
+        }
+
         function appendSuspect(name) {
             const li = createLi(name, 'updateSuspectNumbers(); updateA4Visibility()');
-            if(!CONFIG[currentType].isInvestigation) {
-                li.innerHTML = `<strong></strong> ` + li.innerHTML;
-            }
+            li.innerHTML = `<strong></strong> ` + li.innerHTML;
             document.getElementById('paper_suspects').appendChild(li);
             updateSuspectNumbers();
             updateA4Visibility();
         }
 
         function updateSuspectNumbers() {
-            if(CONFIG[currentType].isSaisie || CONFIG[currentType].isInvestigation) return;
-            const prefix = CONFIG[currentType].labelSuspect.replace('(S) IMPLIQUÉ(S) :', '').replace('(ES) :', ''); 
+            if(CONFIG[currentType].isSaisie) return;
+            
+            // Personnes impliquées (Civil, Sujets, Accusés...)
+            const prefixSuspect = CONFIG[currentType].labelSuspect.replace('(S) IMPLIQUÉ(S) :', '').replace('(ES) :', '').replace('(S) / PERSONNES LIÉES :', '').trim(); 
             document.querySelectorAll('#paper_suspects li').forEach((li, index) => {
                 const strong = li.querySelector('strong');
-                if(strong) strong.innerText = `${prefix.trim()}(e) ${index + 1} : `;
+                if(strong) strong.innerText = `${prefixSuspect || 'CIVIL'}(e) ${index + 1} : `;
+            });
+
+            // Vrais suspects (Uniquement sur certains rapports)
+            document.querySelectorAll('#paper_vrais_suspects li').forEach((li, index) => {
+                const strong = li.querySelector('strong');
+                if(strong) strong.innerText = `SUSPECT(E) ${index + 1} : `;
             });
         }
 
         function appendInfraction(nom, amende, peine) {
             const row = document.createElement('tr');
             let content = `<td>• ${nom}</td>`;
-            if (CONFIG[currentType].showTotals) {
+            if (CONFIG[currentType].showTotals && !CONFIG[currentType].isSaisie) {
                 content += `<td style="text-align:right">$${amende} <span class="remove-btn" onclick="removeInfraction(this, ${amende}, ${peine})">✘</span></td>`;
                 currentAmende += amende; currentPeine += peine;
                 updateTotals();
@@ -1050,7 +1226,12 @@
                 content += `<td style="text-align:right"><span class="remove-btn" onclick="this.closest('tr').remove();">✘</span></td>`;
             }
             row.innerHTML = content;
-            document.getElementById('paper_infractions').appendChild(row);
+            
+            if(CONFIG[currentType].isSaisie) {
+                document.getElementById('paper_saisie_infractions').appendChild(row);
+            } else {
+                document.getElementById('paper_infractions').appendChild(row);
+            }
         }
 
         function removeInfraction(btn, amende, peine) {
@@ -1071,7 +1252,7 @@
                 reader.onload = (e) => {
                     const div = document.createElement('div');
                     div.className = "evidence-item";
-                    div.innerHTML = `<img src="${e.target.result}"><span class="remove-btn" style="position:absolute; top:5px; right:5px; background:white; border-radius:50%; padding:0 5px;" onclick="this.parentElement.remove();">✘</span><div class="editable-zone no-underline" contenteditable="true" style="display:block; text-align:center; font-size:0.8em;">Description...</div>`;
+                    div.innerHTML = `<img src="${e.target.result}" style="max-width:100%; max-height:100%; width:auto; height:auto; margin:auto; display:block;"><span class="remove-btn" style="position:absolute; top:5px; right:5px; background:white; border-radius:50%; padding:0 5px;" onclick="this.parentElement.remove();">✘</span><div class="editable-zone no-underline" contenteditable="true" style="display:block; text-align:center; font-size:0.8em;">Description...</div>`;
                     gallery.appendChild(div);
                 };
                 reader.readAsDataURL(file);
@@ -1083,17 +1264,22 @@
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    target.innerHTML = `<img src="${e.target.result}" style="width:100%; height:100%; object-fit:contain; background:#fff;">`;
+                    target.innerHTML = `<img src="${e.target.result}" style="max-width:100%; max-height:100%; width:auto; height:auto; margin:auto; display:block; background:#fff;">`;
                 };
                 reader.readAsDataURL(input.files[0]);
             }
         }
 
         // --- GESTION EXPORT & PAGINATION DYNAMIQUE ---
-        async function captureAndSlice(element, baseFilename) {
+        async function captureAndSlice(element, baseFilename, noSplit = false) {
             const options = { scale: 3, useCORS: true, backgroundColor: "#ffffff" }; 
             const canvas = await html2canvas(element, options);
             
+            if (noSplit) {
+                download(canvas, `${baseFilename}.jpg`);
+                return;
+            }
+
             const a4Ratio = 297 / 210; 
             const sliceHeight = Math.floor(canvas.width * a4Ratio); 
             
@@ -1135,12 +1321,11 @@
                 if (!nomCivil) nomCivil = "INCONNU";
             }
 
-            let textePressePapier = `<@&1468889483872043143>\n`;
+            let textePressePapier = ``;
             if (CONFIG[currentType].isSaisie) {
-                textePressePapier += `**📋 ${docType}**\n`;
                 const formattedName = document.getElementById('saisie_nom_civil').innerText.trim();
-                textePressePapier += `**👤 Nom :** ${formattedName || 'Inconnu'}\n`;
-                textePressePapier += `**Fiche d'identification civile mise à jour.**`;
+                textePressePapier += `${formattedName || 'Inconnu'}\n`;
+                textePressePapier += `Initialisation fiche d'identification civile.`;
             } else if (CONFIG[currentType].isInvestigation) {
                 textePressePapier += `**📋 ${docType}**\n`;
                 const cible = document.getElementById('a4_inves_target').innerText.trim();
@@ -1151,11 +1336,14 @@
                 textePressePapier += `**📋 ${docType} - N°${docId}**\n`;
                 const agents = Array.from(document.querySelectorAll('#paper_agents li span.editable-zone')).map(s => s.innerText.trim()).join(', ');
                 const suspects = Array.from(document.querySelectorAll('#paper_suspects li span.editable-zone')).map(s => s.innerText.trim()).join(', ');
+                const vraisSuspects = Array.from(document.querySelectorAll('#paper_vrais_suspects li span.editable-zone')).map(s => s.innerText.trim()).join(', ');
                 const amende = document.getElementById('total_amende').innerText;
                 const peine = document.getElementById('total_peine').innerText;
                 
                 textePressePapier += `**👮 Agents impliqués :** ${agents || 'Aucun'}\n`;
-                textePressePapier += `**👤 Personnes concernées :** ${suspects || 'Aucune'}\n`;
+                let allConcerned = suspects;
+                if(vraisSuspects) allConcerned += (allConcerned ? ', ' : '') + vraisSuspects;
+                textePressePapier += `**👤 Personnes concernées :** ${allConcerned || 'Aucune'}\n`;
                 if (CONFIG[currentType].showTotals) {
                     textePressePapier += `**⚖️ Sanctions :** ${amende}$ d'amende / ${peine} mois de prison`;
                 }
@@ -1169,13 +1357,16 @@
             
             try {
                 let nomBaseFichier = `${currentType}_${docId}_P1`;
+                let nePasDiviser = false;
+
                 if (CONFIG[currentType].isSaisie) {
-                    nomBaseFichier = `SAISIE_${nomCivil}_P1`;
+                    nomBaseFichier = `SAISIE_${nomCivil}`;
+                    nePasDiviser = true; // Saisie ne doit pas se diviser en deux
                 } else if (CONFIG[currentType].isInvestigation) {
                     nomBaseFichier = `INVESTIGATION_${nomCivil}_P1`;
                 }
                 
-                await captureAndSlice(document.getElementById('page1'), nomBaseFichier);
+                await captureAndSlice(document.getElementById('page1'), nomBaseFichier, nePasDiviser);
 
                 if (!CONFIG[currentType].isSaisie && document.getElementById('evidence_gallery').children.length > 0) {
                     let nomPreuve = `${currentType}_${docId}_P2`;
