@@ -107,7 +107,6 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
 
-        /* Retrait du colspan pour uniformiser les 6 boutons en mode 2x3 */
         .tabs button {
             background: #e2e8f0;
             color: var(--accent);
@@ -148,7 +147,6 @@
         .flex-row input { flex: 1; width: 0; min-width: 0; }
         .flex-row button { flex: 1; padding: 8px 4px; font-size: 0.8em;}
 
-        /* CACHER LES BOUTONS DÉSACTIVÉS DANS CONTROLS */
         .controls button:disabled {
             display: none !important;
         }
@@ -164,7 +162,6 @@
         .section-disabled { display: none !important; }
         .d-none { display: none !important; }
 
-        /* BOUTONS OUTILS (Sauvegarde, Page, Poubelle) */
         .btn-icon {
             background: #e2e8f0;
             color: #34495e;
@@ -184,7 +181,6 @@
         .btn-icon-danger { color: #c0392b; background: #fadbd8; }
         .btn-icon-danger:hover { background: #f5b7b1; color: #a93226; }
 
-        /* GESTION FEUILLE A4 */
         #export-container { 
             display: flex; 
             flex-direction: column; 
@@ -221,7 +217,6 @@
         .editable-zone { border-bottom: 1px dashed #999; min-width: 30px; height: auto; display: inline-block; outline: none; transition: background 0.2s; word-break: break-word; }
         .editable-zone:focus { background: #ffffd0; border-bottom: 1px solid #000; }
         
-        /* Classe pour empêcher le texte long sur champs courts */
         .short-text { white-space: nowrap; overflow: hidden; }
 
         .no-underline { border-bottom: none !important; }
@@ -272,16 +267,13 @@
             letter-spacing: 1px;
         }
 
-        /* Focus pour le collage d'image */
         .paste-zone { cursor: pointer; transition: 0.2s; }
         .paste-zone:focus { border-color: var(--blue-police) !important; background: #eef7ff !important; outline: none; }
 
-        /* Harmonisation de la fiche de saisie */
         .saisie-field-row { display: flex; margin-bottom: 5px; align-items: center; }
         .saisie-field-label { font-weight: bold; width: 190px; flex-shrink: 0; }
         .saisie-field-value { flex-grow: 1; min-width: 50px; }
 
-        /* NOUVEAU STYLE POUR OBJETS ET SEPARATION */
         .saisie-top-block {
             background: #eef2f6; 
             padding: 15px; 
@@ -390,11 +382,10 @@
                         <input type="text" id="saisie_obj_desc" placeholder="Détails (Couleur, Type d'arme...)">
                         <input type="text" id="saisie_obj_id" placeholder="Plaque / N° Série / Commentaire">
                         <button onclick="addSaisieObject()" style="background:var(--success); margin-top:5px;">Ajouter à la fiche</button>
-                        <div style="font-size:0.75em; margin-top:8px; text-align:center; color:#555;">(Cliquez sur le cadre de l'objet sur la feuille puis faites Ctrl+V pour coller sa photo)</div>
                     </div>
 
                     <div class="manual-box" style="text-align: center; font-size: 0.85em; margin-top: 10px;">
-                        <strong>Note :</strong> Remplissez les champs (Nom, Date de Naissance, Email, Observations...) directement sur la feuille A4.<br><br>
+                        <strong>Note :</strong> Remplissez les champs directement sur la feuille A4.<br><br>
                         <span style="color:#c0392b; font-weight:bold;">⛔ NE PAS DEMANDER D'AFFILIATION DURANT LE RECENSEMENT ⛔</span>
                     </div>
                 </div>
@@ -407,7 +398,7 @@
                 </section>
 
                 <section id="sec_preuves_standard" style="margin-top: 15px;">
-                    <label>Preuves Photos (Fichier ou Ctrl+V) :</label>
+                    <label>Preuves Photos (Fichier ou Collage) :</label>
                     <input type="file" id="file_input" multiple accept="image/*" onchange="handleImages(this)">
                 </section>
 
@@ -441,7 +432,7 @@
                 
                 <div id="a4_standard_body">
                     <div id="a4_arrestation_photo_container" class="d-none" style="float: right; margin: 0 0 15px 20px; z-index: 10;">
-                        <div id="arrestation_photo_profil" class="paste-zone" tabindex="0" style="width: 130px; height: 130px; border: 2px dashed #999; display: flex; align-items: center; justify-content: center; text-align: center; color: #777; background: #fff; overflow: hidden; font-size: 0.8em; padding: 5px;">PHOTO<br>PROFIL<br><br><span style="font-size:0.8em">(Focus + Ctrl V)</span></div>
+                        <div id="arrestation_photo_profil" class="paste-zone" tabindex="0" style="width: 130px; height: 130px; border: 2px dashed #999; display: flex; align-items: center; justify-content: center; text-align: center; color: #777; background: #fff; overflow: hidden; font-size: 0.8em; padding: 5px;">PHOTO<br>PROFIL</div>
                     </div>
 
                     <div id="a4_investigation_motif_box" class="d-none" style="margin-bottom: 15px;">
@@ -488,7 +479,7 @@
                     
                     <div id="a4_observations" class="d-none">
                         <p><strong>OBSERVATIONS :</strong></p>
-                        <div id="a4_obs_text" class="editable-zone" contenteditable="true" style="width:100%; min-height:40px; display:block;">Amende appliquée et réglée le ***.</div>
+                        <div id="a4_obs_text" class="editable-zone" contenteditable="true" style="width:100%; min-height:40px; display:block;"></div>
                     </div>
                 </div>
 
@@ -500,13 +491,13 @@
                                 <div class="saisie-field-row"><div class="saisie-field-label">NOM / PRÉNOM :</div> <div class="editable-zone no-underline short-text saisie-field-value" id="saisie_nom_civil" contenteditable="true"></div></div>
                                 <div class="saisie-field-row"><div class="saisie-field-label">SEXE :</div> <div class="editable-zone no-underline short-text saisie-field-value" id="saisie_sexe" contenteditable="true"></div></div>
                                 <div class="saisie-field-row"><div class="saisie-field-label">ETHNIE :</div> <div class="editable-zone no-underline short-text saisie-field-value" id="saisie_ethnie" contenteditable="true"></div></div>
-                                <div class="saisie-field-row"><div class="saisie-field-label">DATE DE NAISSANCE :</div> <div class="editable-zone no-underline short-text saisie-field-value" id="saisie_dob" contenteditable="true"></div></div>
+                                <div class="saisie-field-row"><div class="saisie-field-label">DATE DE NAISSANCE :</div> <div class="editable-zone no-underline short-text saisie-field-value" id="saisie_dob" contenteditable="true">JJ/MM/AAAA</div></div>
                                 <div class="saisie-field-row"><div class="saisie-field-label">ADRESSE :</div> <div class="editable-zone no-underline short-text saisie-field-value" id="saisie_adresse" contenteditable="true"></div></div>
                                 <div class="saisie-field-row"><div class="saisie-field-label">N° TÉLÉPHONE :</div> <div class="editable-zone no-underline short-text saisie-field-value" id="saisie_tel" contenteditable="true"></div></div>
                                 <div class="saisie-field-row"><div class="saisie-field-label">EMAIL (DISCORD) :</div> <div class="editable-zone no-underline short-text saisie-field-value" id="saisie_email" contenteditable="true"></div></div>
                             </div>
                             <div style="width: 150px;">
-                                <div id="saisie_photo_profil" class="paste-zone" tabindex="0" style="width: 150px; height: 150px; border: 2px dashed #999; display: flex; align-items: center; justify-content: center; text-align: center; color: #777; background: #fff; overflow: hidden; font-size: 0.8em; padding: 5px;">PHOTO<br>PROFIL<br><br><span style="font-size:0.8em">(Focus + Ctrl V)</span></div>
+                                <div id="saisie_photo_profil" class="paste-zone" tabindex="0" style="width: 150px; height: 150px; border: 2px dashed #999; display: flex; align-items: center; justify-content: center; text-align: center; color: #777; background: #fff; overflow: hidden; font-size: 0.8em; padding: 5px;">PHOTO<br>PROFIL</div>
                             </div>
                         </div>
                     </div>
@@ -517,14 +508,11 @@
                     </div>
 
                     <p><strong>PIÈCES D'IDENTITÉ :</strong></p>
-                    <div id="saisie_photo_id" class="paste-zone" tabindex="0" style="width: 100%; height: 120px; border: 2px dashed #999; display: flex; align-items: center; justify-content: center; text-align: center; color: #777; background: #fff; overflow: hidden; font-size: 0.9em; margin-bottom: 20px;">PHOTO CARTE D'IDENTITÉ <br> (Sélectionnez le cadre et faites Ctrl+V)</div>
+                    <div id="saisie_photo_id" class="paste-zone" tabindex="0" style="width: 100%; height: 120px; border: 2px dashed #999; display: flex; align-items: center; justify-content: center; text-align: center; color: #777; background: #fff; overflow: hidden; font-size: 0.9em; margin-bottom: 20px;">PHOTO CARTE D'IDENTITÉ</div>
                     <div class="saisie-field-row"><div class="saisie-field-label">AFFILIATION CRIMINELLE :</div> <div class="editable-zone no-underline short-text saisie-field-value" id="saisie_aff" contenteditable="true">Aucune / Inconnue</div></div>
 
-                    <p><strong>CASIER JUDICIAIRE :</strong></p>
-                    <div id="saisie_casier" class="editable-zone" contenteditable="true" style="width:100%; min-height:40px; display:block;">"DOSSIER(s): Nº ";</div>
-                    
                     <div id="a4_saisie_infractions_section">
-                        <p><strong>DÉLITS / INFRACTIONS (les plus importants) :</strong></p>
+                        <p><strong>CASIER JUDICIAIRE (DÉLITS LES + GRAVES) :</strong></p>
                         <table><tbody id="paper_saisie_infractions"></tbody></table>
                     </div>
 
@@ -532,7 +520,7 @@
                     <div id="saisie_objets_list" style="display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;"></div>
 
                     <p><strong>OBSERVATIONS :</strong></p>
-                    <div id="saisie_observations" class="editable-zone" contenteditable="true" style="width:100%; min-height:60px; display:block; margin-bottom: 20px;">N/A</div>
+                    <div id="saisie_observations" class="editable-zone" contenteditable="true" style="width:100%; min-height:60px; display:block; margin-bottom: 20px;">Signes distinctifs (Tatouages...) : <br>Patrons d'habits aperçus : </div>
                 </div>
 
                 <div class="signature-box" style="border: 2px solid #000; padding: 12px; background: #fff;">
@@ -582,7 +570,6 @@
             }
         };
 
-        // VARIABLES GLOBALES (ISOLATION DES DONNÉES)
         let stateData = {};
         let currentType = null;
         let currentAmende = 0;
@@ -606,11 +593,9 @@
             
             document.getElementById('doc_id').addEventListener('input', updateTabTitle);
             
-                    // --- FORCE LE FORMAT TÉLÉPHONE (000) 000-0000 EN TEMPS RÉEL ---
             const telInput = document.getElementById('saisie_tel');
             if(telInput) {
                 telInput.addEventListener('input', function() {
-                    let cursor = window.getSelection().getRangeAt(0).startOffset;
                     let raw = this.innerText.replace(/\D/g, '').slice(0, 10);
                     let formatted = "";
                     if (raw.length > 0) {
@@ -619,7 +604,6 @@
                         if (raw.length > 6) formatted += "-" + raw.substring(6, 10);
                     }
                     this.innerText = formatted;
-                    // Repositionne le curseur à la fin pour ne pas bloquer la saisie
                     let range = document.createRange();
                     let sel = window.getSelection();
                     range.selectNodeContents(this);
@@ -628,7 +612,6 @@
                     sel.addRange(range);
                 });
 
-                // COPIE PROPRE (CHIFRES UNIQUEMENT)
                 telInput.addEventListener('copy', function(e) {
                     const raw = this.innerText.replace(/\D/g, '');
                     e.clipboardData.setData('text/plain', raw);
@@ -636,7 +619,6 @@
                 });
             }
 
-            // --- FORCE LE FORMAT DATE JJ/MM/AAAA EN TEMPS RÉEL ET VISUELLEMENT ---
             const dobInput = document.getElementById('saisie_dob');
             if(dobInput) {
                 dobInput.addEventListener('focus', function() { 
@@ -646,7 +628,7 @@
                 dobInput.addEventListener('blur', function() {
                     let val = this.innerText.replace(/\D/g, '');
                     if(val.length >= 8) { this.innerText = `${val.substring(0,2)}/${val.substring(2,4)}/${val.substring(4,8)}`; }
-                    else if (val.length === 0) { this.innerText = 'JJ/MM/AAAA'; } // Remet le placeholder visuel si vide
+                    else if (val.length === 0) { this.innerText = 'JJ/MM/AAAA'; }
                     else if (val.length > 0) { this.innerText = val; }
                 });
                 dobInput.addEventListener('input', function() {
@@ -675,7 +657,6 @@
             }, 600); 
         };
 
-        // --- EMPÊCHER LE SAUT DE LIGNE (ENTER) DANS LES CHAMPS COURTS ---
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
                 if (e.target.classList.contains('short-text') || e.target.closest('.short-text')) {
@@ -685,7 +666,6 @@
             }
         });
 
-        // --- GESTION DE L'ISOLATION DES ONGLETS (SAUVEGARDE & RESTAURATION) ---
         function saveCurrentState() {
             if (!currentType) return;
             stateData[currentType] = {
@@ -714,7 +694,6 @@
                 saisie_occu: document.getElementById('saisie_occu').innerHTML,
                 saisie_permis: document.getElementById('saisie_permis').innerHTML,
                 saisie_aff: document.getElementById('saisie_aff').innerHTML,
-                saisie_casier: document.getElementById('saisie_casier').innerHTML,
                 saisie_photo_profil: document.getElementById('saisie_photo_profil').innerHTML,
                 saisie_photo_id: document.getElementById('saisie_photo_id').innerHTML,
                 saisie_objets_list: document.getElementById('saisie_objets_list').innerHTML,
@@ -749,20 +728,19 @@
             document.getElementById('saisie_nom_civil').innerHTML = d.saisie_nom || "";
             document.getElementById('saisie_sexe').innerHTML = d.saisie_sexe || "";
             document.getElementById('saisie_ethnie').innerHTML = d.saisie_ethnie || "";
-            document.getElementById('saisie_dob').innerHTML = d.saisie_dob || "";
+            document.getElementById('saisie_dob').innerHTML = d.saisie_dob || "JJ/MM/AAAA";
             document.getElementById('saisie_adresse').innerHTML = d.saisie_adresse || "";
             document.getElementById('saisie_tel').innerHTML = d.saisie_tel || "";
             document.getElementById('saisie_email').innerHTML = d.saisie_email || "";
             document.getElementById('saisie_occu').innerHTML = d.saisie_occu || "";
             document.getElementById('saisie_permis').innerHTML = d.saisie_permis || "";
             document.getElementById('saisie_aff').innerHTML = d.saisie_aff || "";
-            document.getElementById('saisie_casier').innerHTML = d.saisie_casier || "";
-            document.getElementById('saisie_photo_profil').innerHTML = d.saisie_photo_profil || "PHOTO<br>PROFIL<br><br><span style=\"font-size:0.8em\"></span>";
+            document.getElementById('saisie_photo_profil').innerHTML = d.saisie_photo_profil || "PHOTO<br>PROFIL";
             document.getElementById('saisie_photo_id').innerHTML = d.saisie_photo_id || "PHOTO PIECES D'IDENTITÉ";
             document.getElementById('saisie_objets_list').innerHTML = d.saisie_objets_list || "";
-            document.getElementById('saisie_observations').innerHTML = d.saisie_observations || "Signes distinctifs (Tatouages...) : <br>Patrons d'habits aperçus :";
+            document.getElementById('saisie_observations').innerHTML = d.saisie_observations || "Signes distinctifs (Tatouages...) : <br>Patrons d'habits aperçus : ";
 
-            document.getElementById('arrestation_photo_profil').innerHTML = d.arrest_photo || "PHOTO<br>PROFIL<br><br><span style=\"font-size:0.8em\"></span>";
+            document.getElementById('arrestation_photo_profil').innerHTML = d.arrest_photo || "PHOTO<br>PROFIL";
             document.getElementById('a4_inves_target').innerHTML = d.inves_target || "";
         }
 
@@ -784,7 +762,11 @@
                 if (type === 'PLAINTE' || type === 'INVESTIGATION' || type === 'SAISIE') {
                     document.getElementById('a4_obs_text').innerHTML = "<br>";
                 } else {
-                    document.getElementById('a4_obs_text').innerHTML = "Amende appliquée et réglée le ***.";
+                    const now = new Date();
+                    const d = String(now.getDate()).padStart(2, '0');
+                    const m = String(now.getMonth() + 1).padStart(2, '0');
+                    const y = now.getFullYear();
+                    document.getElementById('a4_obs_text').innerHTML = `État de la procédure : Garde à vue terminée.<br>Statut financier : En attente de régularisation ou acquittement immédiat.<br><br>Mention légale :<br>"L'individu a purgé l'intégralité de sa peine privative de liberté en cellule de garde à vue. Amende appliquée et réglée le ${d}/${m}/${y}. L'individu confirme avoir pris connaissance de l'intégralité de ses droits, confirme les avoir compris et avoir pu en faire appel durant la durée de sa rétention."`;
                 }
             }
 
@@ -840,7 +822,6 @@
             document.getElementById('btn_add_temoin').disabled = !conf.showTemoins || isSaisie;
             document.getElementById('btn_man_temoin').disabled = !conf.showTemoins || isSaisie;
 
-            // En Saisie, les infractions sont actives !
             const showInfr = conf.showInfractions;
             setSectionDisabled('sec_infractions', !showInfr);
             setSectionDisabled('sec_manual_infraction', !showInfr);
@@ -893,32 +874,31 @@
             
             document.getElementById('doc_id').innerText = m + d + h; 
             document.getElementById('a4_recit').innerHTML = `Date : ${d}/${m}/${y}<br>Heure : ${h}h${min}<br>Lieu : <br><br>Déroulement :`;
-            document.getElementById('a4_obs_text').innerHTML = "Amende appliquée et réglée le ***.";
+            
+            document.getElementById('a4_obs_text').innerHTML = `État de la procédure : Garde à vue terminée.<br>Statut financier : En attente de régularisation ou acquittement immédiat.<br><br>Mention légale :<br>"L'individu a purgé l'intégralité de sa peine privative de liberté en cellule de garde à vue. Amende appliquée et réglée le ${d}/${m}/${y}. L'individu confirme avoir pris connaissance de l'intégralité de ses droits, confirme les avoir compris et avoir pu en faire appel durant la durée de sa rétention."`;
             
             document.getElementById('a4_signature').innerHTML = "";
             document.getElementById('saisie_nom_civil').innerHTML = "";
             document.getElementById('saisie_sexe').innerHTML = "";
             document.getElementById('saisie_ethnie').innerHTML = "";
             document.getElementById('saisie_adresse').innerHTML = "";
-            document.getElementById('saisie_dob').innerHTML = "";
+            document.getElementById('saisie_dob').innerHTML = "JJ/MM/AAAA";
             document.getElementById('saisie_tel').innerHTML = "";
             document.getElementById('saisie_email').innerHTML = "";
             document.getElementById('saisie_occu').innerHTML = "Aucune";
             document.getElementById('saisie_permis').innerHTML = "Aucun";
             document.getElementById('saisie_aff').innerHTML = "Aucune / Inconnue";
-            document.getElementById('saisie_casier').innerHTML = "Vierge.";
             
-            const defPhoto = "PHOTO<br>PROFIL<br><br><span style=\"font-size:0.8em\">(Focus + Ctrl V)</span>";
+            const defPhoto = "PHOTO<br>PROFIL";
             document.getElementById('saisie_photo_profil').innerHTML = defPhoto;
             document.getElementById('arrestation_photo_profil').innerHTML = defPhoto;
-            document.getElementById('saisie_photo_id').innerHTML = "PHOTO CARTE D'IDENTITÉ <br> (Sélectionnez le cadre et faites Ctrl+V)";
+            document.getElementById('saisie_photo_id').innerHTML = "PHOTO CARTE D'IDENTITÉ";
             document.getElementById('saisie_objets_list').innerHTML = "";
-            document.getElementById('saisie_observations').innerHTML = "N/A";
+            document.getElementById('saisie_observations').innerHTML = "Signes distinctifs (Tatouages...) : <br>Patrons d'habits aperçus : ";
             
             currentAmende = 0; currentPeine = 0; updateTotals();
         }
 
-        // AJOUTER UN OBJET (FICHE DE SAISIE)
         function addSaisieObject() {
             const type = document.getElementById('saisie_obj_type').value;
             const nom = document.getElementById('saisie_obj_nom').value || "Nom...";
@@ -930,7 +910,7 @@
             div.className = "saisie-obj-card";
             div.innerHTML = `
                 <div class="paste-zone" tabindex="0" style="width:100%; height:90px; display:flex; align-items:center; justify-content:center; background:#f0f2f5; overflow:hidden; border-radius: 4px; border: 1px dashed #a0aec0;">
-                    <span style="font-size:0.8em; color:#718096;">Photo<br>(Focus + Ctrl V)</span>
+                    <span style="font-size:0.8em; color:#718096;">Photo</span>
                 </div>
                 <span class="remove-btn" style="position:absolute; top:-8px; right:-8px; background:#fff; border: 1px solid #e74c3c; border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:12px; margin:0;" onclick="this.parentElement.remove();">✘</span>
                 <div class="editable-zone no-underline short-text" contenteditable="true" style="font-size:0.85em; font-weight:bold; display:block; color:var(--blue-police); border-bottom: 1px solid #edf2f7 !important; padding-bottom:3px;">${type}</div>
@@ -945,7 +925,6 @@
             document.getElementById('saisie_obj_id').value = '';
         }
 
-        // GESTION DU COLLAGE D'IMAGES (Ctrl+V) UNIVERSEL
         document.addEventListener('paste', function(e) {
             const items = e.clipboardData.items;
             let imageFile = null;
@@ -961,7 +940,6 @@
                 reader.onload = (event) => {
                     const active = document.activeElement;
                     if (active && active.classList.contains('paste-zone')) {
-                        // Empêche l'étirement des photos de carte en gardant auto et max-width
                         active.innerHTML = `<img src="${event.target.result}" style="max-width:100%; max-height:100%; width:auto; height:auto; margin:auto; display:block; background:#fff;">`;
                     } else {
                         const div = document.createElement('div');
@@ -974,7 +952,6 @@
             }
         });
 
-        // SAUVEGARDE ET CHARGEMENT VIA PRESSE-PAPIER
         function exportImportData() {
             let action = prompt("TAPEZ 'E' POUR EXPORTER OU 'I' POUR IMPORTER :\n(E = Copier les données actuelles / I = Coller des données)");
             if(!action) return;
@@ -1013,7 +990,7 @@
                 
                 const b64 = btoa(encodeURIComponent(JSON.stringify(data)));
                 if (navigator.clipboard && navigator.clipboard.writeText) {
-                    navigator.clipboard.writeText(b64).then(() => alert("✅ Code de sauvegarde copié dans le presse-papier !\nVous pourrez le recharger plus tard."));
+                    navigator.clipboard.writeText(b64).then(() => alert("✅ Code de sauvegarde copié dans le presse-papier !"));
                 } else {
                     prompt("Copiez manuellement ce code :", b64);
                 }
@@ -1033,7 +1010,7 @@
                         document.getElementById('paper_infractions').innerHTML = data.html_infractions || "";
                         document.getElementById('paper_saisie_infractions').innerHTML = data.html_saisie_infractions || "";
                         document.getElementById('evidence_gallery').innerHTML = data.html_evidence || "";
-                        document.getElementById('arrestation_photo_profil').innerHTML = data.html_arrest_photo || "PHOTO<br>PROFIL<br><br><span style=\"font-size:0.8em\">(Focus + Ctrl V)</span>";
+                        document.getElementById('arrestation_photo_profil').innerHTML = data.html_arrest_photo || "PHOTO<br>PROFIL";
                         
                         document.querySelectorAll('.editable-zone').forEach((el, index) => {
                             if(data.zones[index] !== undefined) el.innerHTML = data.zones[index];
@@ -1200,15 +1177,12 @@
 
         function updateSuspectNumbers() {
             if(CONFIG[currentType].isSaisie) return;
-            
-            // Personnes impliquées (Civil, Sujets, Accusés...)
             const prefixSuspect = CONFIG[currentType].labelSuspect.replace('(S) IMPLIQUÉ(S) :', '').replace('(ES) :', '').replace('(S) / PERSONNES LIÉES :', '').trim(); 
             document.querySelectorAll('#paper_suspects li').forEach((li, index) => {
                 const strong = li.querySelector('strong');
                 if(strong) strong.innerText = `${prefixSuspect || 'CIVIL'}(e) ${index + 1} : `;
             });
 
-            // Vrais suspects (Uniquement sur certains rapports)
             document.querySelectorAll('#paper_vrais_suspects li').forEach((li, index) => {
                 const strong = li.querySelector('strong');
                 if(strong) strong.innerText = `SUSPECT(E) ${index + 1} : `;
@@ -1270,7 +1244,6 @@
             }
         }
 
-        // --- GESTION EXPORT & PAGINATION DYNAMIQUE ---
         async function captureAndSlice(element, baseFilename, noSplit = false) {
             const options = { scale: 3, useCORS: true, backgroundColor: "#ffffff" }; 
             const canvas = await html2canvas(element, options);
@@ -1297,9 +1270,7 @@
                     ctx.fillStyle = "#ffffff";
                     ctx.fillRect(0, 0, sliceCanvas.width, sliceCanvas.height);
                     ctx.drawImage(canvas, 0, currentY, canvas.width, h, 0, 0, canvas.width, h);
-                    
                     download(sliceCanvas, `${baseFilename}_Partie${pageNum}.jpg`);
-                    
                     currentY += sliceHeight;
                     pageNum++;
                 }
@@ -1309,7 +1280,6 @@
         async function exportTwoPages() {
             const docId = document.getElementById('doc_id').innerText || "000";
             const docType = CONFIG[currentType].title;
-            
             let nomCivil = "CIVIL";
             if (CONFIG[currentType].isSaisie) {
                 const textBrut = document.getElementById('saisie_nom_civil').innerText.trim();
@@ -1324,14 +1294,12 @@
             let textePressePapier = ``;
             if (CONFIG[currentType].isSaisie) {
                 const formattedName = document.getElementById('saisie_nom_civil').innerText.trim();
-                textePressePapier += `${formattedName || 'Inconnu'}\n`;
-                textePressePapier += `Initialisation fiche d'identification civile.`;
+                textePressePapier += `${formattedName || 'Inconnu'}\nInitialisation fiche d'identification civile.`;
             } else if (CONFIG[currentType].isInvestigation) {
                 textePressePapier += `**📋 ${docType}**\n`;
                 const cible = document.getElementById('a4_inves_target').innerText.trim();
                 const agents = Array.from(document.querySelectorAll('#paper_agents li span.editable-zone')).map(s => s.innerText.trim()).join(', ');
-                textePressePapier += `**🎯 Cible / Sujet :** ${cible || 'Inconnu'}\n`;
-                textePressePapier += `**👮 Agents impliqués :** ${agents || 'Aucun'}\n`;
+                textePressePapier += `**🎯 Cible / Sujet :** ${cible || 'Inconnu'}\n**👮 Agents impliqués :** ${agents || 'Aucun'}\n`;
             } else {
                 textePressePapier += `**📋 ${docType} - N°${docId}**\n`;
                 const agents = Array.from(document.querySelectorAll('#paper_agents li span.editable-zone')).map(s => s.innerText.trim()).join(', ');
@@ -1339,7 +1307,6 @@
                 const vraisSuspects = Array.from(document.querySelectorAll('#paper_vrais_suspects li span.editable-zone')).map(s => s.innerText.trim()).join(', ');
                 const amende = document.getElementById('total_amende').innerText;
                 const peine = document.getElementById('total_peine').innerText;
-                
                 textePressePapier += `**👮 Agents impliqués :** ${agents || 'Aucun'}\n`;
                 let allConcerned = suspects;
                 if(vraisSuspects) allConcerned += (allConcerned ? ', ' : '') + vraisSuspects;
@@ -1354,20 +1321,16 @@
             }
 
             document.body.classList.add('exporting');
-            
             try {
                 let nomBaseFichier = `${currentType}_${docId}_P1`;
                 let nePasDiviser = false;
-
                 if (CONFIG[currentType].isSaisie) {
                     nomBaseFichier = `SAISIE_${nomCivil}`;
-                    nePasDiviser = true; // Saisie ne doit pas se diviser en deux
+                    nePasDiviser = true;
                 } else if (CONFIG[currentType].isInvestigation) {
                     nomBaseFichier = `INVESTIGATION_${nomCivil}_P1`;
                 }
-                
                 await captureAndSlice(document.getElementById('page1'), nomBaseFichier, nePasDiviser);
-
                 if (!CONFIG[currentType].isSaisie && document.getElementById('evidence_gallery').children.length > 0) {
                     let nomPreuve = `${currentType}_${docId}_P2`;
                     if(CONFIG[currentType].isInvestigation) nomPreuve = `INVESTIGATION_${nomCivil}_P2`;
