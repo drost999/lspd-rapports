@@ -215,10 +215,10 @@
 
         h1 { font-size: 1.8em; margin: 10px 0; text-align: center; }
 
-        .editable-zone { border-bottom: 1px dashed #999; min-width: 30px; height: auto; display: inline-block; outline: none; transition: background 0.2s; word-break: break-word; vertical-align: bottom; }
+        .editable-zone { border-bottom: 1px dashed #999; min-width: 30px; height: auto; display: inline-block; outline: none; transition: background 0.2s; word-break: break-word; }
         .editable-zone:focus { background: #ffffd0; border-bottom: 1px solid #000; }
         
-        .short-text { white-space: nowrap; /* overflow retiré pour corriger la hauteur des lettres */ }
+        .short-text { white-space: nowrap; overflow: hidden; }
 
         .no-underline { border-bottom: none !important; }
 
@@ -434,7 +434,7 @@
                 
                 <div id="a4_standard_body">
                     <div id="a4_arrestation_photo_container" class="d-none" style="float: right; margin: 0 0 15px 20px; z-index: 10;">
-                        <div id="arrestation_photo_profil" class="paste-zone" tabindex="0" style="width: 130px; height: 130px; border: 2px dashed #999; display: flex; align-items: center; justify-content: center; text-align: center; color: #777; background: #fff; overflow: hidden; font-size: 0.8em; padding: 5px;">PHOTO<br>PROFIL</div>
+                        <div id="arrestation_photo_profil" class="paste-zone" tabindex="0" style="width: 130px; height: 130px; border: 2px dashed #999; display: flex; align-items: center; justify-content: center; text-align: center; color: #777; background: #fff; overflow: hidden; font-size: 0.8em;">PHOTO<br>PROFIL</div>
                     </div>
 
                     <div id="a4_investigation_motif_box" class="d-none" style="margin-bottom: 15px;">
@@ -501,7 +501,7 @@
                                 </div>
                             </div>
                             <div style="width: 150px;" id="saisie_top_photo">
-                                <div id="saisie_photo_profil" class="paste-zone" tabindex="0" style="width: 150px; height: 150px; border: 2px dashed #999; display: flex; align-items: center; justify-content: center; text-align: center; color: #777; background: #fff; overflow: hidden; font-size: 0.8em; padding: 5px;">PHOTO<br>PROFIL</div>
+                                <div id="saisie_photo_profil" class="paste-zone" tabindex="0" style="width: 150px; height: 150px; border: 2px dashed #999; display: flex; align-items: center; justify-content: center; text-align: center; color: #777; background: #fff; overflow: hidden; font-size: 0.8em;">PHOTO<br>PROFIL</div>
                             </div>
                         </div>
                     </div>
@@ -512,7 +512,7 @@
                         </div>
 
                         <p><strong>PIÈCE(S) D'IDENTITÉ :</strong></p>
-                        <div id="saisie_photo_id" class="paste-zone" tabindex="0" style="width: 50%; height: 120px; border: 2px dashed #999; display: flex; align-items: center; justify-content: center; text-align: center; color: #777; background: #fff; overflow: hidden; font-size: 0.9em; margin-bottom: 20px;">PHOTO CARTE D'IDENTITÉ</div>
+                        <div id="saisie_photo_id" class="paste-zone" tabindex="0" style="width: 340px; height: 190px; border: 2px dashed #999; display: flex; align-items: center; justify-content: center; text-align: center; color: #777; background: #fff; overflow: hidden; font-size: 0.9em; margin-bottom: 20px;">PHOTO CARTE D'IDENTITÉ</div>
                         
                         <p><strong>OBSERVATIONS :</strong></p>
                         <div id="saisie_observations" class="editable-zone" contenteditable="true" style="width:100%; min-height:60px; display:block; margin-bottom: 20px;">Signes distinctifs (Tatouages...) : <br>Patrons d'habits aperçus : </div>
@@ -911,7 +911,7 @@
             document.getElementById('arrestation_photo_profil').innerHTML = defPhoto;
             document.getElementById('saisie_photo_id').innerHTML = "PHOTO CARTE D'IDENTITÉ";
             document.getElementById('saisie_objets_list').innerHTML = "";
-            document.getElementById('saisie_observations').innerHTML = "Signes distinctifs (Tatouages...) : <br>Patrons d'habits aperçus : ";
+            document.getElementById('saisie_observations').innerHTML = "Signes distinctifs : <br>Patrons d'habits aperçus : ";
             
             currentAmende = 0; currentPeine = 0; updateTotals();
         }
@@ -957,11 +957,11 @@
                 reader.onload = (event) => {
                     const active = document.activeElement;
                     if (active && active.classList.contains('paste-zone')) {
-                        active.innerHTML = `<img src="${event.target.result}" style="max-width:100%; max-height:100%; width:auto; height:auto; margin:auto; display:block; background:#fff;">`;
+                        active.innerHTML = `<img src="${event.target.result}" style="width:100%; height:100%; object-fit:cover; display:block; background:#fff;">`;
                     } else {
                         const div = document.createElement('div');
                         div.className = "evidence-item";
-                        div.innerHTML = `<img src="${event.target.result}" style="max-width:100%; max-height:100%; width:auto; height:auto; margin:auto; display:block;"><span class="remove-btn" style="position:absolute; top:5px; right:5px; background:white; border-radius:50%; padding:0 5px;" onclick="this.parentElement.remove();">✘</span><div class="editable-zone no-underline" contenteditable="true" style="display:block; text-align:center; font-size:0.8em;">Description...</div>`;
+                        div.innerHTML = `<img src="${event.target.result}" style="width:100%; height:100%; object-fit:cover; display:block;"><span class="remove-btn" style="position:absolute; top:5px; right:5px; background:white; border-radius:50%; padding:0 5px;" onclick="this.parentElement.remove();">✘</span><div class="editable-zone no-underline" contenteditable="true" style="display:block; text-align:center; font-size:0.8em;">Description...</div>`;
                         document.getElementById('evidence_gallery').appendChild(div);
                     }
                 };
@@ -1247,7 +1247,7 @@
                 reader.onload = (e) => {
                     const div = document.createElement('div');
                     div.className = "evidence-item";
-                    div.innerHTML = `<img src="${e.target.result}" style="max-width:100%; max-height:100%; width:auto; height:auto; margin:auto; display:block;"><span class="remove-btn" style="position:absolute; top:5px; right:5px; background:white; border-radius:50%; padding:0 5px;" onclick="this.parentElement.remove();">✘</span><div class="editable-zone no-underline" contenteditable="true" style="display:block; text-align:center; font-size:0.8em;">Description...</div>`;
+                    div.innerHTML = `<img src="${e.target.result}" style="width:100%; height:100%; object-fit:cover; display:block;"><span class="remove-btn" style="position:absolute; top:5px; right:5px; background:white; border-radius:50%; padding:0 5px;" onclick="this.parentElement.remove();">✘</span><div class="editable-zone no-underline" contenteditable="true" style="display:block; text-align:center; font-size:0.8em;">Description...</div>`;
                     gallery.appendChild(div);
                 };
                 reader.readAsDataURL(file);
@@ -1259,7 +1259,7 @@
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    target.innerHTML = `<img src="${e.target.result}" style="max-width:100%; max-height:100%; width:auto; height:auto; margin:auto; display:block; background:#fff;">`;
+                    target.innerHTML = `<img src="${e.target.result}" style="width:100%; height:100%; object-fit:cover; display:block; background:#fff;">`;
                 };
                 reader.readAsDataURL(input.files[0]);
             }
