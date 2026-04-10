@@ -215,10 +215,10 @@
 
         h1 { font-size: 1.8em; margin: 10px 0; text-align: center; }
 
-        .editable-zone { border-bottom: 1px dashed #999; min-width: 30px; height: auto; display: inline-block; outline: none; transition: background 0.2s; word-break: break-word; }
+        .editable-zone { border-bottom: 1px dashed #999; min-width: 30px; height: auto; display: inline-block; outline: none; transition: background 0.2s; word-break: break-word; vertical-align: bottom; }
         .editable-zone:focus { background: #ffffd0; border-bottom: 1px solid #000; }
         
-        .short-text { white-space: nowrap; overflow: hidden; }
+        .short-text { white-space: nowrap; /* overflow retiré pour corriger la hauteur des lettres */ }
 
         .no-underline { border-bottom: none !important; }
 
@@ -773,7 +773,9 @@
                     const d = String(now.getDate()).padStart(2, '0');
                     const m = String(now.getMonth() + 1).padStart(2, '0');
                     const y = now.getFullYear();
-                    document.getElementById('a4_obs_text').innerHTML = `État de la procédure : Garde à vue terminée.<br>Statut financier : En attente de régularisation ou acquittement immédiat.<br><br>Mention légale :<br>"L'individu a purgé l'intégralité de sa peine privative de liberté en cellule de garde à vue. Amende appliquée et réglée le ${d}/${m}/${y}. L'individu confirme avoir pris connaissance de l'intégralité de ses droits, confirme les avoir compris et avoir pu en faire appel durant la durée de sa rétention."`;
+                    const h = String(now.getHours()).padStart(2, '0');
+                    const min = String(now.getMinutes()).padStart(2, '0');
+                    document.getElementById('a4_obs_text').innerHTML = `État de la procédure : Garde à vue terminée.<br>Statut financier : En attente de régularisation ou acquittement immédiat.<br><br>Mention légale :<br>"L'individu a purgé l'intégralité de sa peine privative de liberté en cellule de garde à vue le ${d}/${m}/${y} à ${h}h${min}. Amende appliquée et réglée le ${d}/${m}/${y}. L'individu confirme avoir pris connaissance de l'intégralité de ses droits, confirme les avoir compris et avoir pu en faire appel durant la durée de sa rétention."`;
                 }
             }
 
@@ -891,7 +893,7 @@
             document.getElementById('doc_id').innerText = m + d + h; 
             document.getElementById('a4_recit').innerHTML = `Date : ${d}/${m}/${y}<br>Heure : ${h}h${min}<br>Lieu : <br><br>Déroulement :`;
             
-            document.getElementById('a4_obs_text').innerHTML = `État de la procédure : Garde à vue terminée.<br>Statut financier : En attente de régularisation ou acquittement immédiat.<br><br>Mention légale :<br>"L'individu a purgé l'intégralité de sa peine privative de liberté en cellule de garde à vue. Amende appliquée et réglée le ${d}/${m}/${y}. L'individu confirme avoir pris connaissance de l'intégralité de ses droits, confirme les avoir compris et avoir pu en faire appel durant la durée de sa rétention."`;
+            document.getElementById('a4_obs_text').innerHTML = `État de la procédure : Garde à vue terminée.<br>Statut financier : En attente de régularisation ou acquittement immédiat.<br><br>Mention légale :<br>"L'individu a purgé l'intégralité de sa peine privative de liberté en cellule de garde à vue le ${d}/${m}/${y} à ${h}h${min}. Amende appliquée et réglée le ${d}/${m}/${y}. L'individu confirme avoir pris connaissance de l'intégralité de ses droits, confirme les avoir compris et avoir pu en faire appel durant la durée de sa rétention."`;
             
             document.getElementById('a4_signature').innerHTML = "";
             document.getElementById('saisie_nom_civil').innerHTML = "";
